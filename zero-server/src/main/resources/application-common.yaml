@@ -1,0 +1,97 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+
+  output:
+    ansi:
+      enabled: always
+
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  info:
+    os:
+      enabled: true
+    env:
+      enabled: true
+    java:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    access:
+      default: read_only
+  endpoint:
+    startup:
+      access: read_only
+    shutdown:
+      access: read_only
+    env:
+      show-values: always
+      access: read_only
+    configprops:
+      show-values: always
+      access: read_only
+    health:
+      probes:
+        enabled: true
+        add-additional-paths: true
+      show-components: always
+      show-details: always
+      group:
+        readiness:
+          include: "*"
+        liveness:
+          include: "*"
+      access: read_only
+    logfile:
+      external-file: /logs/${spring.application.name}/${HOSTNAME:HOSTNAME}.log
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+
+  observations:
+    key-values:
+      service.name: ${spring.application.name}
+      service.namespace: ${NAMESPACE:zero}
+      application: ${spring.application.name}
+      namespace: ${NAMESPACE:zero}
+      hostname: ${HOSTNAME:HOSTNAME}
+      instance: ${HOSTNAME:None}
+
+    annotations:
+      enabled: true
+
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: W3C
+
+logging:
+  level:
+    root: info
+    web: info
+    sql: debug
+    org.hibernate.orm.jdbc.bind: trace
+    org.springframework.jdbc.core.StatementCreatorUtils: trace
+  file:
+    name: /logs/${spring.application.name}/${HOSTNAME:HOSTNAME}.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: /logs/${spring.application.name}/%d{yyyy-MM-dd}/${HOSTNAME:-${spring.application.name}}.log.%d{yyyy-MM-dd}.%i.gz
+      clean-history-on-start: false
+      max-file-size: 100MB
+      total-size-cap: 10GB
+      max-history: 30
+
+springdoc:
+  group-configs:
+    - group: api
+      paths-to-match: /api/**

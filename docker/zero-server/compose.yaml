@@ -1,0 +1,47 @@
+name: ${APPLICATION}
+
+services:
+  demo:
+    image: ${REGISTRY}/${NAMESPACE}-${APPLICATION}:${IMAGE_TAG}
+    pull_policy: always
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.1"
+          memory: 100M
+    volumes:
+      - logs:/logs/${APPLICATION}
+    environment:
+      TZ: Asia/Shanghai
+      DT: "2025-01-01T00:00:00"
+    env_file:
+      - ../.env
+      - .env
+    labels:
+      namespace: ${NAMESPACE}
+      application: ${APPLICATION}
+      framework: spring-boot
+    networks:
+      - ${NETWORK}
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
+
+networks:
+  pb:
+    external: true
+
+volumes:
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_DIR}/${APPLICATION}
+

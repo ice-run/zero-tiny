@@ -1,0 +1,13 @@
+spring:
+
+  application:
+    name: ${APPLICATION:zero-server}
+
+  config:
+    import:
+      - optional:classpath:application-common.yaml
+      - optional:classpath:application-mysql.yaml
+      - optional:classpath:application-redis.yaml
+
+app:
+  slogan: ${APP_SLOGAN:冰点稳定，极速运行！}
