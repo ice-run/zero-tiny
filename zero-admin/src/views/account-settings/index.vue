@@ -14,6 +14,7 @@ import PreferencesIcon from "~icons/ri/settings-3-line";
 import SecurityLogIcon from "~icons/ri/window-line";
 import AccountManagementIcon from "~icons/ri/profile-line";
 import { UserData } from "@/api/system";
+import { fileUrl } from "@/utils/zero/file";
 
 defineOptions({
   name: "AccountSettings"
@@ -64,7 +65,7 @@ getUserInfo({ param: {} }).then(res => {
           </div>
         </el-menu-item>
         <div class="flex items-center ml-8 mt-4 mb-4">
-          <el-avatar :size="48" :src="userInfo.avatar" />
+          <el-avatar :size="48" :src="fileUrl({ id: userInfo.avatar })" />
           <div class="ml-4 flex flex-col max-w-[130px]">
             <ReText class="font-bold self-baseline!">
               {{ userInfo.nickname }}

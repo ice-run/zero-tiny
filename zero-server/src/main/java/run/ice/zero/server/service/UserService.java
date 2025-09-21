@@ -30,6 +30,7 @@ import run.ice.zero.server.model.user.UserUpdate;
 import run.ice.zero.server.model.user.UserUpsert;
 import run.ice.zero.server.repository.FileInfoRepository;
 import run.ice.zero.server.repository.UserRepository;
+import run.ice.zero.server.util.BeanUtil;
 
 import java.time.Duration;
 import java.util.*;
@@ -106,6 +107,7 @@ public class UserService implements UserDetailsService {
 
     public UserData userInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
         String username = authentication.getName();
         Optional<User> optional = userRepository.findByUsername(username);
         if (optional.isEmpty()) {
@@ -119,6 +121,7 @@ public class UserService implements UserDetailsService {
 
     public UserData userUpdate(UserUpdate param) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
         String username = authentication.getName();
         Optional<User> optional = userRepository.findByUsername(username);
         if (optional.isEmpty()) {
@@ -195,7 +198,7 @@ public class UserService implements UserDetailsService {
             // entity.setUpdateTime(LocalDateTime.now());
         }
 
-        BeanUtils.copyProperties(param, entity);
+        BeanUtils.copyProperties(param, entity, BeanUtil.nullProperties(param));
         entity = userRepository.saveAndFlush(entity);
 
         String key = CacheConstant.USER + id;
@@ -211,7 +214,7 @@ public class UserService implements UserDetailsService {
         Integer size = pageParam.getSize();
         User model = new User();
         UserSearch param = pageParam.getParam();
-        BeanUtils.copyProperties(param, model);
+        BeanUtils.copyProperties(param, model, BeanUtil.nullProperties(param));
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.contains());
         Example<User> example = Example.of(model, matcher);
