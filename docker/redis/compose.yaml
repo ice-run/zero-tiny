@@ -3,14 +3,14 @@ name: redis
 services:
   redis:
     container_name: redis
-    image: registry.cn-beijing.aliyuncs.com/daodao-bot/redis:7.4.2
+    image: registry.cn-beijing.aliyuncs.com/daodao-bot/redis:8.2.0
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: "1"
+          memory: 1G
         reservations:
-          cpus: "0.25"
+          cpus: "0.2"
           memory: 256M
     ports:
       - "6379:6379"

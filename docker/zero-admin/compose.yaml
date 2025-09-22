@@ -1,22 +1,22 @@
 name: ${APPLICATION}
 
 services:
-  demo:
+  zero-admin:
+    container_name: ${APPLICATION}
     image: ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}
     pull_policy: always
     deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
-        reservations:
           cpus: "0.2"
-          memory: 256M
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    ports:
+      - "80:80"
     volumes:
-      - logs:/logs/${APPLICATION}
+      - ./conf.d:/etc/nginx/conf.d
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00"
@@ -26,22 +26,12 @@ services:
     labels:
       namespace: ${NAMESPACE}
       application: ${APPLICATION}
-      framework: spring-boot
     networks:
       - ${NETWORK}
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost"]
 
 networks:
   zero:
     external: true
-
-volumes:
-  logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${LOGS_DIR}/${APPLICATION}
-

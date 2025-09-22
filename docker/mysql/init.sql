@@ -2,11 +2,11 @@ SET NAMES utf8mb4;
 
 CREATE DATABASE IF NOT EXISTS `zero_tiny` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
-CREATE USER IF NOT EXISTS 'zero'@'%' IDENTIFIED BY 'zero';
+-- CREATE USER IF NOT EXISTS 'zero'@'%' IDENTIFIED BY 'zero';
 
-GRANT ALL PRIVILEGES ON `zero_tiny`.* TO 'zero'@'%';
+-- GRANT ALL PRIVILEGES ON `zero_tiny`.* TO 'zero'@'%';
 
-FLUSH PRIVILEGES;
+-- FLUSH PRIVILEGES;
 
 USE `zero_tiny`;
 

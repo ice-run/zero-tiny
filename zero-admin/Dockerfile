@@ -1,20 +1,14 @@
-FROM node:20-alpine as build-stage
-
-WORKDIR /app
-RUN corepack enable
-RUN corepack prepare pnpm@latest --activate
-
-RUN npm config set registry https://registry.npmmirror.com
-
-COPY .npmrc package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
+FROM registry.cn-beijing.aliyuncs.com/daodao-bot/node:24 AS builder
+WORKDIR /build
 COPY . .
-RUN pnpm build
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+RUN npm install -g pnpm
+RUN pnpm config set registry https://registry.npmmirror.com
+RUN pnpm install
+RUN pnpm run build
 
-FROM nginx:stable-alpine as production-stage
-
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+FROM registry.cn-beijing.aliyuncs.com/daodao-bot/nginx:1.29.0
+VOLUME /tmp
+COPY --from=builder /build/dist /usr/share/nginx/html
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

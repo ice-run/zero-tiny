@@ -3,14 +3,14 @@ name: mysql
 services:
   mysql:
     container_name: mysql
-    image: registry.cn-beijing.aliyuncs.com/daodao-bot/mysql:9.2.0
+    image: registry.cn-beijing.aliyuncs.com/daodao-bot/mysql:${MYSQL_TAG}
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: "1"
+          memory: 1G
         reservations:
-          cpus: "0.25"
+          cpus: "0.2"
           memory: 256M
     ports:
       - "3306:3306"

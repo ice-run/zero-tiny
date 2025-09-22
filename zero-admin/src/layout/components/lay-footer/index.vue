@@ -11,7 +11,7 @@ const TITLE = getConfig("Title");
     Copyright © 2025-present
     <a
       class="hover:text-primary!"
-      href="https://gitee.com/ice-run"
+      href="https://gitee.com/ice-run/zero-tiny"
       target="_blank"
     >
       &nbsp;{{ TITLE }}

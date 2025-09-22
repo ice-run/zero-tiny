@@ -9,20 +9,21 @@ YELLOW='\033[0;33m'
 GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
 
-# 默认配置变量
-MODE=""
-REGISTRY="crpi-e586m5viszd4b0qi.cn-hangzhou.personal.cr.aliyuncs.com/cdd-energy"
-NAMESPACE="pb"
-APPLICATION=""
-IMAGE_TAG=""
-COMPOSE_FILE="compose.yaml"
-ENV_FILE=".env"
-
 # 日志函数
 log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} ${GRAY}$1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
+
+# 默认配置变量
+MODE="RESTART"
+DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
+REGISTRY_NAMESPACE="ice-run-open"
+NAMESPACE="zero"
+COMPOSE_FILE="compose.yaml"
+ENV_FILE=".env"
+APPLICATION=""
+IMAGE_TAG="latest"
 
 # 显示帮助信息
 show_help() {
@@ -80,14 +81,89 @@ parse_args() {
   fi
 }
 
+# 从环境变量配置文件中提取指定的单个变量值
+# 参数1: 要提取的变量名
+# 参数2: 默认值（可选）
+# 返回值: 变量值（如果找到）或默认值或空字符串
+get_env_var() {
+  local var_name="$1"
+  local default_value="$2"
+  local var_value=""
+  local found=false
+
+  # 检查参数
+  if [ -z "${var_name}" ]; then
+    log_error "用法: get_env_var <变量名> [默认值]"
+    return 1
+  fi
+
+  # 检查文件是否存在
+  if [ ! -f "${ENV_FILE}" ]; then
+    log_warn "环境文件不存在: ${ENV_FILE}"
+    # 如果提供了默认值，则返回默认值
+    if [ -n "${default_value}" ]; then
+      echo "${default_value}"
+      return 0
+    fi
+    # 否则返回空字符串
+    echo ""
+    return 1
+  fi
+
+  # 读取文件并查找指定变量
+  while IFS= read -r line || [ -n "$line" ]; do
+    # 跳过空行和注释
+    [ -z "$line" ] || [[ $line == \#* ]] && continue
+
+    # 使用正则表达式匹配键值对，支持空格
+    if [[ "$line" =~ ^[[:space:]]*${var_name}[[:space:]]*=[[:space:]]*(.*)$ ]]; then
+      var_value="${BASH_REMATCH[1]}"
+      found=true
+      break
+    fi
+  done < "${ENV_FILE}"
+
+  # 如果找到变量，处理其值（移除引号）
+  if [ "${found}" = true ]; then
+    # 移除可能的引号
+    var_value="${var_value%\"}"
+    var_value="${var_value#\"}"
+    var_value="${var_value%\'}"
+    var_value="${var_value#\'}"
+    log_debug "从 ${ENV_FILE} 提取变量: ${var_name}=${var_value}"
+    echo "${var_value}"
+    return 0
+  else
+    log_warn "在 ${ENV_FILE} 中未找到变量: ${var_name}"
+    # 如果提供了默认值，则返回默认值
+    if [ -n "${default_value}" ]; then
+      echo "${default_value}"
+      return 0
+    fi
+    # 否则返回空字符串
+    echo ""
+    return 1
+  fi
+}
+
 # 准备镜像
 prepare_image() {
-  log_info "准备镜像 ${REGISTRY}/${NAMESPACE}-${APPLICATION}:${IMAGE_TAG} ..."
-  if docker pull "${REGISTRY}/${NAMESPACE}-${APPLICATION}:${IMAGE_TAG}"; then
+  log_info "准备镜像 ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG} ..."
+  if docker pull "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}"; then
     log_info "docker pull 成功，已获取指定镜像！"
   else
     log_warn "docker pull 失败，尝试本地构建镜像..."
-    sh ./build.sh "${APPLICATION}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
+    local code_dir = $(get_env_var "CODE_DIR")
+    if [ -z "${code_dir}" ]; then
+      log_error "未找到 CODE_DIR 环境变量"
+    fi
+    if [ ! -d "${code_dir}" ]; then
+      log_error "代码目录 ${code_dir} 不存在"
+    fi
+    if [ ! -f "${code_dir}/build.sh" ]; then
+      log_error "代码目录 ${code_dir} 中不存在 build.sh 脚本"
+    fi
+    sh "${code_dir}/build.sh" "${APPLICATION}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
   fi
 }
 
@@ -135,7 +211,7 @@ update_compose_file() {
 
   # 只在更新模式下替换镜像标签
   if [ "${MODE}" = "UPDATE" ]; then
-    sed -i "s|\(image: .*/${NAMESPACE}-${APPLICATION}:\).*|\1${IMAGE_TAG}|g" "${COMPOSE_FILE}"
+    sed -i "s|\(image: .*/${REGISTRY_NAMESPACE}/${APPLICATION}:\).*|\1${IMAGE_TAG}|g" "${COMPOSE_FILE}"
   fi
 
   # 无论哪种模式都修改部署时间

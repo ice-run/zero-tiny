@@ -1,0 +1,38 @@
+version: '1.0'
+name: zero-admin
+displayName: zero-admin
+triggers:
+  trigger: auto
+  push:
+    tags:
+      prefix:
+        - 2
+    paths:
+      include:
+        - ^zero-admin/.*$
+variables:
+  REGISTRY_NAMESPACE: ice-run-open
+  NAMESPACE: zero
+  APPLICATION: zero-admin
+stages:
+  - name: build
+    displayName: 构建
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@docker
+        name: build_docker
+        displayName: 构建镜像
+        type: cert
+        certificate: aliyun-cr-ice-run
+        tag: ${DOCKER_REGISTRY}/${APPLICATION}:${GITEE_BRANCH}
+        dockerfile: ./${APPLICATION}/Dockerfile
+        context: ./${APPLICATION}
+        artifacts: []
+        isCache: true
+        parameter: {}
+        notify: []
+        strategy:
+          retry: '0'
+          timeout: 10

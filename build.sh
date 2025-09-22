@@ -9,18 +9,19 @@ YELLOW='\033[0;33m'
 GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
 
-# 默认配置变量
-PROJECT="cdd-pb"
-REGISTRY="crpi-e586m5viszd4b0qi.cn-hangzhou.personal.cr.aliyuncs.com/cdd-energy"
-NAMESPACE="pb"
-APPLICATION=""
-IMAGE_TAG=""
-
 # 日志函数
 log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} ${GRAY}$1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
+
+# 默认配置变量
+PROJECT="zero-tiny"
+DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
+REGISTRY_NAMESPACE="ice-run-open"
+NAMESPACE="zero"
+APPLICATION=""
+IMAGE_TAG="latest"
 
 # 显示帮助信息
 show_help() {
@@ -40,7 +41,7 @@ show_help() {
 
 # 参数处理
 parse_args() {
-  WORK_DIR="$(pwd)"
+  PROJECT_DIR="$(pwd)"
   # 检查是否请求帮助
   if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     show_help
@@ -48,14 +49,18 @@ parse_args() {
   fi
 
   # 检查参数数量
-  if [ $# -ne 2 ]; then
+  if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     log_error "参数数量错误。请使用 -h 或 --help 查看帮助信息"
   fi
 
   # 设置应用名称（第一个位置参数）
   APPLICATION="$1"
   # 设置镜像标签（第二个位置参数）
-  IMAGE_TAG="$2"
+  if [ $# -eq 1 ]; then
+    IMAGE_TAG="latest"
+  else
+    IMAGE_TAG="$2"
+  fi
 
   # 验证应用名称不为空
   if [ -z "${APPLICATION}" ]; then
@@ -68,63 +73,29 @@ parse_args() {
   fi
 }
 
-# git 拉取最新代码
-git_pull() {
-  # 切换工程目录
-  switch_project_dir
-  # 检查是否为 git 仓库
-  if [ ! -d ".git" ]; then
-    log_error "当前目录不是 git 仓库"
-  fi
-  log_info "git 拉取最新代码 ..."
-  git pull origin master || log_error "git 拉取最新代码失败！"
-}
-
-# 切换工作目录
-switch_work_dir() {
-  log_debug "切换到工作目录 ${WORK_DIR} ..."
-  if [ ! -d "${WORK_DIR}" ]; then
-    log_error "工作目录 ${WORK_DIR} 不存在！"
-  fi
-  cd "${WORK_DIR}" || log_error "无法切换到工作目录 ${WORK_DIR} ！"
-}
-
 # 切换工程目录
 switch_project_dir() {
-  log_debug "切换到工程目录 ${PROJECT} ..."
-  local project_dir="${WORK_DIR}/${PROJECT}"
-  if [ ! -d "${project_dir}" ]; then
-    log_error "工程目录 ${project_dir} 不存在"
-  fi
-  cd "${project_dir}" || log_error "无法切换到工程目录 ${project_dir} ！"
+  log_debug "切换到工程目录 ${PROJECT_DIR} ..."
+  cd "${PROJECT_DIR}" || log_error "无法切换到工程目录 ${PROJECT_DIR} ！"
 }
 
 # 切换应用目录
 switch_app_dir() {
   # 根据 APPLICATION 切换应用目录
-  local code_dir
+  local module_dir
   case "${APPLICATION}" in
-    "demo"|"base"|"channel"|"data"|"gateway"|"oauth2"|"sba"|"trade"|"user")
-      code_dir="server"
+    "zero-admin")
+      module_dir="zero-admin"
       ;;
-    "docs")
-      code_dir="docs"
-      ;;
-    "faker")
-      code_dir="faker"
-      ;;
-    "agent")
-      code_dir="agent/agent-pc"
-      ;;
-    "operation")
-      code_dir="operation/operation-pc"
+    "zero-server")
+      module_dir="zero-server"
       ;;
     *)
       log_error "无效的应用名称 ${APPLICATION}！"
       ;;
   esac
 
-  local app_dir="${WORK_DIR}/${PROJECT}/${code_dir}"
+  local app_dir="${PROJECT_DIR}/${module_dir}"
   log_debug "切换到应用目录 ${app_dir} ..."
   if [ ! -d "${app_dir}" ]; then
     log_error "应用目录 ${app_dir} 不存在"
@@ -137,13 +108,22 @@ docker_build() {
   switch_app_dir
 
   log_info "docker build ..."
-  docker build -f Dockerfile -t "${REGISTRY}/${NAMESPACE}-${APPLICATION}:${IMAGE_TAG}" --build-arg APPLICATION="${APPLICATION}" . || log_error "docker build 失败！"
+  docker build -f Dockerfile -t "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" . || log_error "docker build 失败！"
 }
 
 # docker push
 docker_push() {
   log_info "docker push ..."
-  docker push "${REGISTRY}/${NAMESPACE}-${APPLICATION}:${IMAGE_TAG}" || log_error "docker push 失败！"
+  # 尝试登录 Docker Registry
+  log_info "尝试登录 Docker Registry：${DOCKER_REGISTRY} ..."
+  if docker login ${DOCKER_REGISTRY}; then
+    # 登录成功，执行推送
+    log_info "Docker Registry 登录成功，开始推送镜像..."
+    docker push "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" || log_error "docker push 失败！"
+  else
+    # 登录失败，输出警告但不中断执行
+    log_warn "Docker Registry 登录失败，跳过镜像推送步骤！"
+  fi
 }
 
 # 主函数
@@ -154,20 +134,16 @@ main() {
   # 解析命令行参数
   parse_args "$@"
 
-  # git 拉取最新代码
-  git_pull
-
   # docker build
   docker_build
 
   # docker push
   docker_push
 
-  # 切换工作目录
-  switch_work_dir
+  # 切换工程目录
+  switch_project_dir
 
-  log_info "${APPLICATION}:${IMAGE_TAG} 构建成功！部署命令： "
-  log_info "./deploy.sh ${APPLICATION} ${IMAGE_TAG}"
+  log_info "${APPLICATION}:${IMAGE_TAG} 构建成功！"
 }
 
 # 执行主函数
