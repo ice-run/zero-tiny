@@ -15,19 +15,20 @@ variables:
   NAMESPACE: zero
   APPLICATION: zero-admin
 stages:
-  - name: scan
-    displayName: 扫描
-    strategy: naturally
-    trigger: auto
-    executor: []
-    steps:
-      - step: sc@opensca
-        name: open_sca
-        displayName: OpenSCA 检测
-        detectPath: ./${APPLICATION}
-        notify: []
-        strategy:
-          retry: '0'
+# 前端工程扫码太慢了！！！
+#  - name: scan
+#    displayName: 扫描
+#    strategy: naturally
+#    trigger: auto
+#    executor: []
+#    steps:
+#      - step: sc@opensca
+#        name: open_sca
+#        displayName: OpenSCA 检测
+#        detectPath: ./${APPLICATION}
+#        notify: []
+#        strategy:
+#          retry: '0'
   - name: build
     displayName: 构建
     strategy: naturally

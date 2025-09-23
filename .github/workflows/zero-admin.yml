@@ -25,11 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@main
 
-      - name: Change Directory
-        run: cd $IMAGE_NAME
-
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
+        run: docker build ./$IMAGE_NAME --file ./$IMAGE_NAME/Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
 
       - name: Login Docker Registry
         run: docker login $REGISTRY_URL -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD

@@ -601,16 +601,16 @@ main() {
   service_health_check "zero-server"
   service_health_check "zero-admin"
 
-  # 切换到 app 目录
-  log_debug "切换到 ${APP_DIR}/ 目录..."
-  cd "${APP_DIR}/" || log_error "切换到 ${APP_DIR}/ 目录失败"
-
   log_info "部署成功！"
   log_debug "可以尝试使用以下命令查看容器状态："
   log_debug "docker ps -a"
 
   host_ip=$(hostname -I | awk '{print $1}')
   log_info "请访问 http://${host_ip}:80"
+
+  # 切换到 app 目录
+  log_debug "切换到 ${APP_DIR}/ 目录..."
+  cd "${APP_DIR}/" || log_error "切换到 ${APP_DIR}/ 目录失败"
 }
 
 # 执行主函数
