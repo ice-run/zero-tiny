@@ -110,6 +110,32 @@ check_docker() {
   log_debug "Docker 环境检查通过"
 }
 
+# 检查 CPU 是否支持 x86-64-v2 指令集
+check_x86_64_v2() {
+  local required_instructions=("sse4_1" "sse4_2" "popcnt")
+  local missing=()
+
+  # 获取 CPU 支持的指令集
+  local cpu_flags
+  cpu_flags=$(grep -m1 'flags' /proc/cpuinfo | tr ' ' '\n')
+
+  # 检查每个必需的指令集
+  for instr in "${required_instructions[@]}"; do
+    if ! echo "$cpu_flags" | grep -q "^$instr$"; then
+      missing+=("$instr")
+    fi
+  done
+
+  if [ ${#missing[@]} -eq 0 ]; then
+    log_info "CPU 支持 x86-64-v2 指令集（所有必需指令均存在）"
+    return 0
+  else
+    log_warn "CPU 不支持 x86-64-v2 指令集，缺少: ${missing[*]}"
+    log_warn "可能会触发 'Fatal glibc error: CPU does not support x86-64-v2' 错误"
+    return 1
+  fi
+}
+
 # 提取 ${ENV_FILE} 文件中的变量
 parse_env() {
   # 检查是否存在 ${ENV_FILE} 文件
@@ -371,7 +397,6 @@ prepare_image() {
     fi
   done
 }
-
 
 # 拉取镜像函数
 pull_image() {
