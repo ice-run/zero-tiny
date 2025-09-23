@@ -16,10 +16,8 @@ log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
 
 # 默认配置变量
-PROJECT="zero-tiny"
 DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
 REGISTRY_NAMESPACE="ice-run-open"
-NAMESPACE="zero"
 APPLICATION=""
 IMAGE_TAG="latest"
 
@@ -33,10 +31,10 @@ show_help() {
   echo "  [镜像标签]        # 部署的镜像标签（可选）"
   echo ""
   echo "选项:"
-  echo "  -h, --help        # 显示帮助信息"
+  echo "  -h, --help       # 显示帮助信息"
   echo ""
   echo "示例:"
-  echo "  $(basename "$0") demo 250101-0         # 构建 demo 镜像标签 250101-0"
+  echo "  $(basename "$0") demo 250101-0  # 构建 demo 镜像标签 250101-0"
 }
 
 # 参数处理
@@ -138,12 +136,13 @@ main() {
   docker_build
 
   # docker push
-  docker_push
+  # 开源版本暂不推送镜像，开发者可自行修改仓库地址和脚本
+  # docker_push
 
   # 切换工程目录
   switch_project_dir
 
-  log_info "${APPLICATION}:${IMAGE_TAG} 构建成功！"
+  log_info "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG} 构建成功！"
 }
 
 # 执行主函数

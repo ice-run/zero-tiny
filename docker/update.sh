@@ -24,6 +24,7 @@ COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
 APPLICATION=""
 IMAGE_TAG="latest"
+CODE_DIR="/app/zero-tiny"
 
 # 显示帮助信息
 show_help() {
@@ -81,69 +82,52 @@ parse_args() {
   fi
 }
 
-# 从环境变量配置文件中提取指定的单个变量值
-# 参数1: 要提取的变量名
-# 参数2: 默认值（可选）
-# 返回值: 变量值（如果找到）或默认值或空字符串
-get_env_var() {
-  local var_name="$1"
-  local default_value="$2"
-  local var_value=""
-  local found=false
+# 提取 ${ENV_FILE} 文件中的变量
+parse_env() {
+  # 检查是否存在 ${ENV_FILE} 文件
+  local env_file="${ENV_FILE}"
 
-  # 检查参数
-  if [ -z "${var_name}" ]; then
-    log_error "用法: get_env_var <变量名> [默认值]"
-    return 1
-  fi
+  # 如果 ${ENV_FILE} 文件存在，则读取变量
+  if [ -f "$env_file" ]; then
+    log_info "从 ${env_file} 文件中提取环境变量..."
 
-  # 检查文件是否存在
-  if [ ! -f "${ENV_FILE}" ]; then
-    log_warn "环境文件不存在: ${ENV_FILE}"
-    # 如果提供了默认值，则返回默认值
-    if [ -n "${default_value}" ]; then
-      echo "${default_value}"
-      return 0
-    fi
-    # 否则返回空字符串
-    echo ""
-    return 1
-  fi
+    while IFS= read -r line || [ -n "$line" ]; do
+      # 跳过空行注释
+      [ -z "$line" ] || [[ $line == \#* ]] && continue
 
-  # 读取文件并查找指定变量
-  while IFS= read -r line || [ -n "$line" ]; do
-    # 跳过空行和注释
-    [ -z "$line" ] || [[ $line == \#* ]] && continue
+      # 提取键值对
+      if [[ "$line" =~ ^([A-Za-z0-9_]+)=(.*)$ ]]; then
+        key="${BASH_REMATCH[1]}"
+        value="${BASH_REMATCH[2]}"
 
-    # 使用正则表达式匹配键值对，支持空格
-    if [[ "$line" =~ ^[[:space:]]*${var_name}[[:space:]]*=[[:space:]]*(.*)$ ]]; then
-      var_value="${BASH_REMATCH[1]}"
-      found=true
-      break
-    fi
-  done < "${ENV_FILE}"
+        # 移除引号
+        value="${value%\"}"
+        value="${value#\"}"
+        value="${value%\'}"
+        value="${value#\'}"
 
-  # 如果找到变量，处理其值（移除引号）
-  if [ "${found}" = true ]; then
-    # 移除可能的引号
-    var_value="${var_value%\"}"
-    var_value="${var_value#\"}"
-    var_value="${var_value%\'}"
-    var_value="${var_value#\'}"
-    log_debug "从 ${ENV_FILE} 提取变量: ${var_name}=${var_value}"
-    echo "${var_value}"
-    return 0
+        # 设置全局变量
+        declare -g "$key"="$value"
+        log_debug "设置变量: $key=$value"
+      fi
+    done < "$env_file"
+
+    log_debug "环境变量提取完成"
   else
-    log_warn "在 ${ENV_FILE} 中未找到变量: ${var_name}"
-    # 如果提供了默认值，则返回默认值
-    if [ -n "${default_value}" ]; then
-      echo "${default_value}"
-      return 0
-    fi
-    # 否则返回空字符串
-    echo ""
-    return 1
+    log_warn "文件 $env_file 不存在，使用默认值"
   fi
+
+  # 输出使用的变量值
+  log_info "变量值: CODE_DIR=${CODE_DIR}"
+
+  # 询问用户是否使用这些变量
+  read -r -p "是否使用这些变量？(Y/N，默认Y): " use_vars
+  if [[ -z "$use_vars" || "$use_vars" =~ ^[Yy]$ ]]; then
+    log_info "使用变量: CODE_DIR=${CODE_DIR}"
+  else
+    log_error "用户选择不使用变量，部署终止。请调整 ${env_file} 文件中的变量后重试。"
+  fi
+
 }
 
 # 准备镜像
@@ -153,7 +137,7 @@ prepare_image() {
     log_info "docker pull 成功，已获取指定镜像！"
   else
     log_warn "docker pull 失败，尝试本地构建镜像..."
-    local code_dir = $(get_env_var "CODE_DIR")
+    local code_dir = "${CODE_DIR}"
     if [ -z "${code_dir}" ]; then
       log_error "未找到 CODE_DIR 环境变量"
     fi
@@ -261,6 +245,9 @@ main() {
 
   # 解析命令行参数
   parse_args "$@"
+
+  # 解析环境变量
+  parse_env
 
   # 准备镜像
   if [ "${MODE}" = "UPDATE" ]; then
