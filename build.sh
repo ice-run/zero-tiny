@@ -16,8 +16,8 @@ log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
 
 # 默认配置变量
-DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
-REGISTRY_NAMESPACE="ice-run-open"
+DOCKER_REGISTRY=""
+REGISTRY_NAMESPACE=""
 APPLICATION=""
 IMAGE_TAG="latest"
 
@@ -137,7 +137,7 @@ main() {
 
   # docker push
   # 开源版本暂不推送镜像，开发者可自行修改仓库地址和脚本
-  # docker_push
+  docker_push
 
   # 切换工程目录
   switch_code_dir

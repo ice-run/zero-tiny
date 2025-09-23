@@ -17,8 +17,8 @@ log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1";
 
 # 默认配置变量
 NETWORK="zero"
-DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
-REGISTRY_NAMESPACE="ice-run-open"
+DOCKER_REGISTRY=""
+REGISTRY_NAMESPACE=""
 DOCKERFILE="Dockerfile"
 COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"

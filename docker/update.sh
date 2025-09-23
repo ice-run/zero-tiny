@@ -17,8 +17,8 @@ log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1";
 
 # 默认配置变量
 MODE="RESTART"
-DOCKER_REGISTRY="crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com"
-REGISTRY_NAMESPACE="ice-run-open"
+DOCKER_REGISTRY=""
+REGISTRY_NAMESPACE=""
 NAMESPACE="zero"
 COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
@@ -128,7 +128,7 @@ prepare_image() {
     log_info "docker pull 成功，已获取指定镜像！"
   else
     log_warn "docker pull 失败，尝试本地构建镜像..."
-    local code_dir = "${CODE_DIR}"
+    local code_dir="${CODE_DIR}"
     if [ -z "${code_dir}" ]; then
       log_error "未找到 CODE_DIR 环境变量"
     fi
@@ -171,8 +171,8 @@ switch_code_dir() {
 
 # 切换应用目录
 switch_app_dir() {
-  log_debug "切换到应用目录 ${APPLICATION} ..."
-  local app_dir="./${APPLICATION}"
+  log_debug "切换到应用目录 ${WORK_DIR}/${APPLICATION} ..."
+  local app_dir="${WORK_DIR}/${APPLICATION}"
   if [ ! -d "${app_dir}" ]; then
     log_error "应用目录 ${app_dir} 不存在"
   fi
