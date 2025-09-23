@@ -4,7 +4,6 @@ services:
   zero-admin:
     container_name: ${APPLICATION}
     image: ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}
-    pull_policy: always
     deploy:
       resources:
         limits:

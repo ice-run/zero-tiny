@@ -3,7 +3,6 @@ name: ${APPLICATION}
 services:
   zero-server:
     image: ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}
-    pull_policy: always
     deploy:
       mode: replicated
       replicas: 1
