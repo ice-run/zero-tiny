@@ -119,15 +119,6 @@ parse_env() {
 
   # 输出使用的变量值
   log_info "变量值: CODE_DIR=${CODE_DIR}"
-
-  # 询问用户是否使用这些变量
-  read -r -p "是否使用这些变量？(Y/N，默认Y): " use_vars
-  if [[ -z "$use_vars" || "$use_vars" =~ ^[Yy]$ ]]; then
-    log_info "使用变量: CODE_DIR=${CODE_DIR}"
-  else
-    log_error "用户选择不使用变量，部署终止。请调整 ${env_file} 文件中的变量后重试。"
-  fi
-
 }
 
 # 准备镜像
@@ -147,8 +138,35 @@ prepare_image() {
     if [ ! -f "${code_dir}/build.sh" ]; then
       log_error "代码目录 ${code_dir} 中不存在 build.sh 脚本"
     fi
+
+    switch_code_dir
+
+    # git 拉取最新代码
+    git_pull
+
     sh "${code_dir}/build.sh" "${APPLICATION}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
   fi
+}
+
+# git 拉取最新代码
+git_pull() {
+  # 切换工程目录
+  switch_code_dir
+  # 检查是否为 git 仓库
+  if [ ! -d ".git" ]; then
+    log_error "当前目录不是 git 仓库"
+  fi
+  log_info "git 拉取最新代码 ..."
+  git pull origin master || log_error "git 拉取最新代码失败！"
+}
+
+# 切换代码目录
+switch_code_dir() {
+  log_debug "切换到代码目录 ${CODE_DIR} ..."
+  if [ ! -d "${CODE_DIR}" ]; then
+    log_error "代码目录 ${CODE_DIR} 不存在"
+  fi
+  cd "${CODE_DIR}" || log_error "无法切换到代码目录 ${CODE_DIR} ！"
 }
 
 # 切换应用目录
@@ -243,11 +261,11 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
-  # 解析命令行参数
-  parse_args "$@"
-
   # 解析环境变量
   parse_env
+
+  # 解析命令行参数
+  parse_args "$@"
 
   # 准备镜像
   if [ "${MODE}" = "UPDATE" ]; then

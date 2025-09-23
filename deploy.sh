@@ -564,14 +564,14 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
-  # 解析命令行参数
-  parse_args "$@"
-
   # 检查 Docker 环境
   check_docker
 
   # 提取环境变量
   parse_env
+
+  # 解析命令行参数
+  parse_args "$@"
 
   # 设置密码
   set_password
@@ -601,17 +601,20 @@ main() {
   service_health_check "zero-server"
   service_health_check "zero-admin"
 
-  log_info "部署成功！"
-  log_debug "可以尝试使用以下命令查看容器状态："
-  log_debug "docker ps -a"
-
-  host_ip=$(hostname -I | awk '{print $1}')
-  log_info "请访问 http://${host_ip}:80"
-
   # 切换到 app 目录
   log_debug "切换到 ${APP_DIR}/ 目录..."
   cd "${APP_DIR}/" || log_error "切换到 ${APP_DIR}/ 目录失败"
+
+  log_info "部署成功！！！"
+  log_info "查看容器状态： docker ps -a"
+
+  host_ip=$(hostname -I | awk '{print $1}')
+  log_info "尝试访问网站： http://${host_ip}:80"
+
 }
 
 # 执行主函数
 main "$@"
+
+# 启动一个新的 shell 在 APP_DIR 目录
+/bin/bash

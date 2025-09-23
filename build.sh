@@ -39,7 +39,7 @@ show_help() {
 
 # 参数处理
 parse_args() {
-  PROJECT_DIR="$(pwd)"
+  CODE_DIR="$(pwd)"
   # 检查是否请求帮助
   if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     show_help
@@ -72,9 +72,9 @@ parse_args() {
 }
 
 # 切换工程目录
-switch_project_dir() {
-  log_debug "切换到工程目录 ${PROJECT_DIR} ..."
-  cd "${PROJECT_DIR}" || log_error "无法切换到工程目录 ${PROJECT_DIR} ！"
+switch_code_dir() {
+  log_debug "切换到工程目录 ${CODE_DIR} ..."
+  cd "${CODE_DIR}" || log_error "无法切换到工程目录 ${CODE_DIR} ！"
 }
 
 # 切换应用目录
@@ -93,7 +93,7 @@ switch_app_dir() {
       ;;
   esac
 
-  local app_dir="${PROJECT_DIR}/${module_dir}"
+  local app_dir="${CODE_DIR}/${module_dir}"
   log_debug "切换到应用目录 ${app_dir} ..."
   if [ ! -d "${app_dir}" ]; then
     log_error "应用目录 ${app_dir} 不存在"
@@ -140,7 +140,7 @@ main() {
   # docker_push
 
   # 切换工程目录
-  switch_project_dir
+  switch_code_dir
 
   log_info "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG} 构建成功！"
 }
