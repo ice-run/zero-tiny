@@ -1,0 +1,41 @@
+name: zero-server
+
+on:
+  push:
+    tags:
+      - '2*'
+    paths:
+      - 'zero-server/**'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      TZ: Asia/Shanghai
+      REGISTRY_URL: ${{ env.ALIYUN_CR_ICE_RUN_REGISTRY_URL }}
+      REGISTRY_NAMESPACE: ice-run-open
+      REGISTRY_USERNAME: ${{ secrets.ALIYUN_CR_ICE_RUN_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.ALIYUN_CR_ICE_RUN_PASSWORD }}
+      IMAGE_NAME: zero-server
+      IMAGE_TAG: latest
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Change Directory
+        run: cd $IMAGE_NAME
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Login Docker Registry
+        run: docker login $REGISTRY_URL -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
+
+      - name: Tag the Docker image
+        run: docker tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Push the Docker Image
+        run: docker push $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:$IMAGE_TAG

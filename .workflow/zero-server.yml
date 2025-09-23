@@ -15,6 +15,19 @@ variables:
   NAMESPACE: zero
   APPLICATION: zero-server
 stages:
+  - name: scan
+    displayName: 扫描
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: sc@opensca
+        name: open_sca
+        displayName: OpenSCA 检测
+        detectPath: ./${APPLICATION}
+        notify: []
+        strategy:
+          retry: '0'
   - name: build
     displayName: 构建
     strategy: naturally
@@ -30,7 +43,7 @@ stages:
         dockerfile: ./${APPLICATION}/Dockerfile
         context: ./${APPLICATION}
         artifacts: []
-        isCache: true
+        isCache: false
         parameter: {}
         notify: []
         strategy:

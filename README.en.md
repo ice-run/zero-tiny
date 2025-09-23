@@ -1,36 +1,54 @@
 # zero-tiny
 
-#### Description
-Zero-Tiny（零度极简版）：基于 Java 21+ 和 Spring Boot 3.x 的 Web 管理平台的快速开发模板框架
+## Introduction
 
-#### Software Architecture
-Software architecture description
+Zero-Tiny: A rapid development template framework for web management platforms based on Java 25+ and Spring Boot 4.x
 
-#### Installation
+## System Architecture
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+The project consists of two modules: frontend and backend.
 
-#### Instructions
+The frontend is based on the vue-pure-admin template and developed using Vue3 + TypeScript + Element Plus + Pinia + Vite.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+The backend is developed based on Spring Boot 4.x.
 
-#### Contribution
+Docker container technology solution is supported.
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+## Build and Deployment
 
+### One-Click Deployment
 
-#### Gitee Feature
+One-click deployment is supported
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+```shell
+./deploy.sh
+```
+
+### Manual Build
+
+```shell
+./build.sh
+```
+
+### Update Deployment
+
+```shell
+./update.sh
+```
+
+## Instructions
+
+Access via browser
+
+http://localhost
+
+Default account and password
+
+admin | admin
+
+## Contribution
+
+1. Fork this repository
+2. Create a new Feat_xxx branch
+3. Submit your code
+4. Create a new Pull Request

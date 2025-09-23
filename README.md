@@ -1,37 +1,54 @@
 # zero-tiny
 
-#### 介绍
-Zero-Tiny（零度极简版）：基于 Java 21+ 和 Spring Boot 3.x 的 Web 管理平台的快速开发模板框架
+## 介绍
 
-#### 软件架构
-软件架构说明
+Zero-Tiny（零度极简版）：基于 Java 25+ 和 Spring Boot 4.x 的 Web 管理平台的快速开发模板框架
 
+## 系统架构
 
-#### 安装教程
+项目分为前端和后端两个模块。
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+前端基于 vue-pure-admin 模板，使用 Vue3 + TypeScript + Element Plus + Pinia + Vite 开发。
 
-#### 使用说明
+后端基于 Spring Boot 4.x 开发。
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+支持基于 Docker 的容器技术方案。
 
-#### 参与贡献
+## 构建部署
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+### 一键部署
 
+支持一键部署
 
-#### 特技
+```shell
+./deploy.sh
+```
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+### 手动构建
+
+```shell
+./build.sh
+```
+
+### 更新部署
+
+```shell
+./update.sh
+```
+
+## 使用说明
+
+浏览器访问
+
+http://localhost
+
+默认账号密码
+
+admin | admin
+
+## 参与贡献
+
+1. Fork 本仓库
+2. 新建 Feat_xxx 分支
+3. 提交代码
+4. 新建 Pull Request
