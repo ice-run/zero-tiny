@@ -5,8 +5,8 @@ spring:
     open-in-view: true
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://mysql:3306/zero_tiny}
-    username: ${MYSQL_USERNAME:zero}
-    password: ${MYSQL_PASSWORD:zero}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

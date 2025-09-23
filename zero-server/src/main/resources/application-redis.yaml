@@ -4,5 +4,5 @@ spring:
       host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
       username: ${REDIS_USERNAME:}
-      password: ${REDIS_PASSWORD:zero}
+      password: ${REDIS_PASSWORD:}
       database: ${REDIS_DATABASE:0}
