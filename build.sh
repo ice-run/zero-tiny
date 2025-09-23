@@ -16,6 +16,7 @@ log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
 
 # 默认配置变量
+ENV_FILE=".env"
 DOCKER_REGISTRY=""
 REGISTRY_NAMESPACE=""
 APPLICATION=""
