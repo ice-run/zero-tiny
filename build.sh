@@ -71,6 +71,45 @@ parse_args() {
   fi
 }
 
+# 提取 ${ENV_FILE} 文件中的变量
+parse_env() {
+  # 检查是否存在 ${ENV_FILE} 文件
+  local env_file="docker/${ENV_FILE}"
+
+  # 如果 ${ENV_FILE} 文件存在，则读取变量
+  if [ -f "$env_file" ]; then
+    log_info "从 ${env_file} 文件中提取环境变量..."
+
+    while IFS= read -r line || [ -n "$line" ]; do
+      # 跳过空行注释
+      [ -z "$line" ] || [[ $line == \#* ]] && continue
+
+      # 提取键值对
+      if [[ "$line" =~ ^([A-Za-z0-9_]+)=(.*)$ ]]; then
+        key="${BASH_REMATCH[1]}"
+        value="${BASH_REMATCH[2]}"
+
+        # 移除引号
+        value="${value%\"}"
+        value="${value#\"}"
+        value="${value%\'}"
+        value="${value#\'}"
+
+        # 设置全局变量
+        declare -g "$key"="$value"
+        log_debug "设置变量: $key=$value"
+      fi
+    done < "$env_file"
+
+    log_debug "环境变量提取完成"
+  else
+    log_warn "文件 $env_file 不存在，使用默认值"
+  fi
+
+  # 输出使用的变量值
+  log_info "变量值: CODE_DIR=${CODE_DIR}"
+}
+
 # 切换工程目录
 switch_code_dir() {
   log_debug "切换到工程目录 ${CODE_DIR} ..."
@@ -128,6 +167,9 @@ docker_push() {
 main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
+
+  # 解析环境变量
+  parse_env
 
   # 解析命令行参数
   parse_args "$@"
