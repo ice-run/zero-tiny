@@ -144,7 +144,9 @@ prepare_image() {
     # git 拉取最新代码
     git_pull
 
-    sh "${code_dir}/build.sh" "${APPLICATION}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
+    # 构建镜像
+    chmod +x "${code_dir}/build.sh" || log_warn "设置 build.sh 文件权限失败！"
+    "${code_dir}/build.sh" "${APPLICATION}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
   fi
 }
 

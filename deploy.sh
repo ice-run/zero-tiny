@@ -428,7 +428,8 @@ pull_image() {
 # 构建镜像函数
 build_image() {
   local image_name="$1";
-  sh ${WORK_DIR}/build.sh "${image_name}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
+  chmod +x "${WORK_DIR}/build.sh" || log_warn "设置 build.sh 文件权限失败！"
+  "${WORK_DIR}/build.sh" "${image_name}" "${IMAGE_TAG}" || log_error "镜像构建也失败了！"
 }
 
 # 部署服务函数
