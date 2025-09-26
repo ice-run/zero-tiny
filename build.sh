@@ -58,7 +58,13 @@ parse_args() {
   if [ $# -eq 1 ]; then
     IMAGE_TAG="tiny-latest"
   else
-    IMAGE_TAG="tiny-$2"
+    # 如果镜像标签以 tiny- 开头，直接使用
+    if [[ "$2" == tiny-* ]]; then
+      IMAGE_TAG="$2"
+    else
+      # 如果镜像标签不以 tiny- 开头，添加 tiny- 前缀
+      IMAGE_TAG="tiny-$2"
+    fi
   fi
 
   # 验证应用名称不为空

@@ -23,7 +23,7 @@ DOCKERFILE="Dockerfile"
 COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
 IMAGE_MODE="pull"
-IMAGE_TAG="latest"
+IMAGE_TAG="tiny-latest"
 
 # 显示帮助信息
 show_help() {
