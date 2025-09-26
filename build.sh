@@ -145,13 +145,13 @@ switch_app_dir() {
 docker_build() {
   switch_app_dir
 
-  log_info "docker build ..."
+  log_info "docker build ${APPLICATION}:${IMAGE_TAG} ..."
   docker build -f Dockerfile -t "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" . || log_error "docker build 失败！"
 }
 
 # docker push
 docker_push() {
-  log_info "docker push ..."
+  log_info "docker push ${APPLICATION}:${IMAGE_TAG} ..."
   # 尝试登录 Docker Registry
   log_info "尝试登录 Docker Registry：${DOCKER_REGISTRY} ..."
   if docker login ${DOCKER_REGISTRY}; then

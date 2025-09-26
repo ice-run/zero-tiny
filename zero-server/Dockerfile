@@ -1,4 +1,4 @@
-FROM registry.cn-beijing.aliyuncs.com/daodao-bot/maven:latest AS builder
+FROM registry.cn-beijing.aliyuncs.com/daodao-bot/maven:3.9 AS builder
 WORKDIR /build
 COPY . .
 RUN mkdir -p /root/.m2
