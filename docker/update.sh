@@ -23,7 +23,7 @@ NAMESPACE="zero"
 COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
 APPLICATION=""
-IMAGE_TAG="latest"
+IMAGE_TAG="tiny-latest"
 CODE_DIR="/app/zero-tiny"
 
 # 显示帮助信息
