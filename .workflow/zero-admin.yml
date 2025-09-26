@@ -40,7 +40,7 @@ stages:
         displayName: 构建镜像
         type: cert
         certificate: aliyun-cr-ice-run
-        tag: ${REGISTRY_NAMESPACE}/${APPLICATION}:${GITEE_BRANCH}
+        tag: ${REGISTRY_NAMESPACE}/${APPLICATION}:tiny-${GITEE_BRANCH}
         dockerfile: ./${APPLICATION}/Dockerfile
         context: ./${APPLICATION}
         artifacts: []

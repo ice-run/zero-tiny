@@ -20,7 +20,7 @@ ENV_FILE=".env"
 DOCKER_REGISTRY=""
 REGISTRY_NAMESPACE=""
 APPLICATION=""
-IMAGE_TAG="latest"
+IMAGE_TAG="tiny-latest"
 
 # 显示帮助信息
 show_help() {
@@ -56,9 +56,9 @@ parse_args() {
   APPLICATION="$1"
   # 设置镜像标签（第二个位置参数）
   if [ $# -eq 1 ]; then
-    IMAGE_TAG="latest"
+    IMAGE_TAG="tiny-latest"
   else
-    IMAGE_TAG="$2"
+    IMAGE_TAG="tiny-$2"
   fi
 
   # 验证应用名称不为空
