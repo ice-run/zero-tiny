@@ -11,8 +11,9 @@ import type {
 } from "./types.d";
 import { stringify } from "qs";
 import NProgress from "../progress";
-import { getToken, formatToken } from "@/utils/auth";
-import { useUserStoreHook } from "@/store/modules/user";
+import { getToken, formatToken, removeToken } from "@/utils/auth";
+import { router } from "@/router";
+import { ElNotification } from "element-plus";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
@@ -120,6 +121,28 @@ class PureHttp {
         }
         const data = response.data?.data;
         console.log("data", data);
+        const code = response.data.code;
+        const message = response.data.message;
+
+        if (code) {
+          if (code !== "0000") {
+            ElNotification({
+              title: "Error",
+              message: message,
+              type: "error"
+            });
+            if (code === "1111") {
+              removeToken();
+              router.push("/login").then(r => {
+                console.debug(r);
+              });
+            }
+            return Promise.reject(response);
+          } else {
+            // console.debug("message", message);
+          }
+        }
+
         return response.data;
       },
       (error: PureHttpError) => {

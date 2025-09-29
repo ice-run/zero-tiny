@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { store, router, resetRouter, routerArrays } from "../utils";
-import { type UserData, type LoginParam } from "@/api/system";
+import type { UserData, LoginParam } from "@/api/system";
 import { oauth2Login, oauth2Logout } from "@/api/system/oauth2";
 import { userInfo } from "@/api/system/user";
 import { useMultiTagsStoreHook } from "./multiTags";

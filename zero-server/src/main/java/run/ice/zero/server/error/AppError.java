@@ -12,34 +12,34 @@ public enum AppError implements ErrorEnum {
 
     /**
      * OK
-     * 现在约定 OK 000000 为请求成功，前 3 个 0 区分服务，后 3 个 0 区分响应码
+     * 现在约定 OK 0000 为请求成功
      */
-    OK("000000", "OK"),
+    OK("0000", "OK"),
 
     /**
      * 全局异常
      */
-    ERROR("999999", "ERROR"),
+    ERROR("9999", "ERROR"),
 
     /**
      * token 错误
      */
-    TOKEN_ERROR("111111", "token 错误"),
+    TOKEN_ERROR("1111", "token 错误"),
 
     /**
      * 权限错误
      */
-    PERMISSION_ERROR("222222", "权限错误"),
+    PERMISSION_ERROR("2222", "权限错误"),
 
     /**
      * 请求参数错误
      */
-    REQUEST_PARAM_ERROR("666666", "请求参数错误"),
+    REQUEST_PARAM_ERROR("6666", "请求参数错误"),
 
     /**
      * 未知异常
      */
-    UNKNOWN_ERROR("888888", "未知异常"),
+    UNKNOWN_ERROR("8888", "未知异常"),
 
     ;
 

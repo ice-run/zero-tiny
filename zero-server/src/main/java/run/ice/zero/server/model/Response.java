@@ -24,12 +24,12 @@ import run.ice.zero.server.error.ErrorEnum;
 public class Response<D> implements Serializer {
 
     /**
-     * `000000` 表示成功，其他表示异常
+     * `0000` 表示成功，其他表示异常
      */
-    @Schema(title = "code", description = "响应编码，6 位数字字符串", example = "000000", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(title = "code", description = "响应编码，4 位数字字符串", example = "0000", accessMode = Schema.AccessMode.READ_ONLY)
     @NotEmpty
-    @Size(min = 6, max = 6)
-    @Pattern(regexp = "^[0-9]{6}$")
+    @Size(min = 4, max = 4)
+    @Pattern(regexp = "^[0-9]{4}$")
     private String code = AppError.OK.code;
 
     /**

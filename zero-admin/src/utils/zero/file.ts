@@ -48,7 +48,7 @@ export async function upload(file: File): Promise<Response<FileData>> {
         message: data.message,
         data: data.data
       };
-      if (response.code === "000000") {
+      if (response.code === "0000") {
         message("上传成功", { type: "success" });
         return response;
       } else {
