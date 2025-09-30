@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import run.ice.zero.server.ZeroServerApplicationTest;
-import run.ice.zero.server.constant.ServerConstant;
 import run.ice.zero.server.helper.TokenHelper;
 import run.ice.zero.server.model.Request;
 import run.ice.zero.server.model.Response;
@@ -22,7 +21,7 @@ class DemoControllerTest extends ZeroServerApplicationTest {
 
     @Test
     void demo() {
-        String api = ServerConstant.DEMO;
+        String api = "demo";
 
         String token = tokenHelper.createToken("admin");
         HttpHeaders headers = new HttpHeaders();

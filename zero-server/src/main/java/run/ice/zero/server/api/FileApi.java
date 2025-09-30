@@ -23,7 +23,7 @@ public interface FileApi {
 
     @Operation(summary = "info 文件信息", description = "传入文件 id，查询文件信息")
     @SecurityRequirement(name = ServerConstant.BEARER_TOKEN)
-    @PostExchange(url = ServerConstant.FILE_INFO)
+    @PostExchange(url = "file-info")
     Response<FileData> info(@RequestBody @Valid Request<FileParam> request);
 
 }

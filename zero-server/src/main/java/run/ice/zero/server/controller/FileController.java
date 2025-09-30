@@ -37,7 +37,7 @@ public class FileController implements FileApi {
 
     @SecurityRequirement(name = ServerConstant.BEARER_TOKEN)
     @Operation(summary = "upload 上传文件", description = "使用 multipart/form-data 上传文件，key = file")
-    @PostMapping(path = ServerConstant.FILE_UPLOAD, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(path = "file-upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public Response<FileData> upload(@RequestPart(name = "file") MultipartFile multipartFile) {
         FileData data = fileService.upload(multipartFile);
         return new Response<>(data);
@@ -45,14 +45,14 @@ public class FileController implements FileApi {
 
     @SecurityRequirement(name = ServerConstant.BEARER_TOKEN)
     @Operation(summary = "download 下载文件", description = "http response 的 header 中包含文件名称， body 是文件数据流")
-    @PostMapping(path = ServerConstant.FILE_DOWNLOAD)
+    @PostMapping(path = "file-download")
     public void download(@RequestBody @Valid Request<FileParam> request, HttpServletResponse response) {
         File file = fileService.download(request.getParam());
         fileService.output(response, file);
     }
 
     @Operation(summary = "view 预览文件", description = "http response 的 header 中包含文件名称， body 是文件数据流")
-    @GetMapping(path = ServerConstant.FILE_VIEW)
+    @GetMapping(path = "file-view")
     public void view(@RequestParam(name = "id") String id, @RequestParam(name = "code") String code, HttpServletResponse response) {
         FileParam param = new FileParam();
         param.setId(id);

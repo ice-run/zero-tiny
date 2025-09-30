@@ -44,11 +44,11 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/actuator/**",
             "/login",
-            "/api/oauth2/login",
+            "/api/login",
     };
 
     private static final String[] ADMIN_PATHS = {
-            "/api/user/upsert",
+            "/api/user-upsert",
     };
 
     @Bean

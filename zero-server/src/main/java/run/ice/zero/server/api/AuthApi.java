@@ -19,17 +19,17 @@ import run.ice.zero.server.model.oauth2.TokenData;
 /**
  * @author DaoDao
  */
-@Tag(name = "OAuth2Api", description = "OAuth2接口")
+@Tag(name = "AuthApi", description = "OAuth2接口")
 @HttpExchange(url = AppConstant.API)
-public interface OAuth2Api {
+public interface AuthApi {
 
     @Operation(summary = "用户登录", description = "用户登录")
-    @PostExchange(url = ServerConstant.OAUTH2_LOGIN)
-    Response<TokenData> oAuth2Login(@RequestBody @Valid Request<LoginParam> request);
+    @PostExchange(url = "login")
+    Response<TokenData> login(@RequestBody @Valid Request<LoginParam> request);
 
     @Operation(summary = "用户退出", description = "用户退出")
     @SecurityRequirement(name = ServerConstant.BEARER_TOKEN)
-    @PostExchange(url = ServerConstant.OAUTH2_LOGOUT)
-    Response<Ok> oAuth2Logout(@RequestBody @Valid Request<No> request);
+    @PostExchange(url = "logout")
+    Response<Ok> logout(@RequestBody @Valid Request<No> request);
 
 }

@@ -23,7 +23,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-public class OAuth2Service {
+public class AuthService {
 
     @Resource
     private UserRepository userRepository;
@@ -37,7 +37,7 @@ public class OAuth2Service {
     @Resource
     private HttpHelper httpHelper;
 
-    public TokenData oAuth2Login(@Valid @NotNull LoginParam param) {
+    public TokenData login(@Valid @NotNull LoginParam param) {
         String username = param.getUsername();
         String password = param.getPassword();
         Optional<User> optional = userRepository.findByUsername(username);
@@ -54,7 +54,7 @@ public class OAuth2Service {
         return tokenData;
     }
 
-    public void oAuth2Logout() {
+    public void logout() {
         String authorization = httpHelper.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization == null || authorization.isEmpty()) {
             throw new AppException(AppError.TOKEN_ERROR);

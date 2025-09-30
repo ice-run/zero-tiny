@@ -22,11 +22,11 @@ import run.ice.zero.server.model.security.ResetPassword;
 public interface SecurityApi {
 
     @Operation(summary = "重置密码", description = "输入 用户 id 和 密码，重新设置密码")
-    @PostExchange(url = ServerConstant.SECURITY_RESET_PASSWORD)
+    @PostExchange(url = "reset-password")
     Response<Ok> resetPassword(@RequestBody @Valid Request<ResetPassword> request);
 
     @Operation(summary = "变更密码", description = "输入 新密码和旧密码，设置用户密码")
-    @PostExchange(url = ServerConstant.SECURITY_CHANGE_PASSWORD)
+    @PostExchange(url = "change-password")
     Response<Ok> changePassword(@RequestBody @Valid Request<ChangePassword> request);
 
 }

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { store, router, resetRouter, routerArrays } from "../utils";
 import type { UserData, LoginParam } from "@/api/system";
-import { oauth2Login, oauth2Logout } from "@/api/system/oauth2";
+import { login, logout } from "@/api/system/auth";
 import { userInfo } from "@/api/system/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import {
@@ -52,7 +52,7 @@ export const useUserStore = defineStore("zero-user", {
 
     /** 登入 */
     async login(param: LoginParam) {
-      await oauth2Login({ param }).then(({ data }) => {
+      await login({ param }).then(({ data }) => {
         const token: string = data.token;
         setToken(token);
       });
@@ -70,7 +70,7 @@ export const useUserStore = defineStore("zero-user", {
     async logout() {
       const token: string = getToken();
       if (token) {
-        await oauth2Logout({ param: {} });
+        await logout({ param: {} });
       }
       removeToken();
       removeUser();

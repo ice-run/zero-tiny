@@ -24,23 +24,23 @@ import run.ice.zero.server.model.user.UserUpsert;
 public interface UserApi {
 
     @Operation(summary = "用户信息", description = "获取当前登录的用户信息")
-    @PostExchange(url = ServerConstant.USER_INFO)
+    @PostExchange(url = "user-info")
     Response<UserData> userInfo(@RequestBody @Valid Request<No> request);
 
     @Operation(summary = "用户更新", description = "用户更新自己的信息")
-    @PostExchange(url = ServerConstant.USER_UPDATE)
+    @PostExchange(url = "user-update")
     Response<UserData> userUpdate(@RequestBody @Valid Request<UserUpdate> request);
 
     @Operation(summary = "查询用户", description = "传入 id 查询用户信息")
-    @PostExchange(url = ServerConstant.USER_SELECT)
+    @PostExchange(url = "user-select")
     Response<UserData> userSelect(@RequestBody @Valid Request<IdParam> request);
 
     @Operation(summary = "写入用户", description = "传入用户信息，新增或更新一个用户")
-    @PostExchange(url = ServerConstant.USER_UPSERT)
+    @PostExchange(url = "user-upsert")
     Response<UserData> userUpsert(@RequestBody @Valid Request<UserUpsert> request);
 
     @Operation(summary = "搜索用户", description = "传入用户信息，搜索用户列表")
-    @PostExchange(url = ServerConstant.USER_SEARCH)
+    @PostExchange(url = "user-search")
     Response<PageData<UserData>> userSearch(@RequestBody @Valid Request<PageParam<UserSearch>> request);
 
 }
