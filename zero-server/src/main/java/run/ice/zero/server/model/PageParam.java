@@ -63,15 +63,15 @@ public class PageParam<P> implements Serializer {
         @NotEmpty
         private String property;
 
-        @Schema(title = "mode", description = "匹配模式", example = "EXACT")
+        @Schema(title = "mode", description = "匹配模式", example = "exact")
         @NotNull
-        // @Pattern(regexp = "^(EXACT|CONTAIN|REGEX)$")
-        private Mode mode = Mode.EXACT;
+        // @Pattern(regexp = "^(exact|contain|regex)$")
+        private Mode mode = Mode.exact;
 
         public static Match of(String property) {
             Match match = new Match();
             match.setProperty(property);
-            match.setMode(Mode.EXACT);
+            match.setMode(Mode.exact);
             return match;
         }
 
@@ -83,7 +83,7 @@ public class PageParam<P> implements Serializer {
         }
 
         public enum Mode {
-            EXACT, CONTAIN, REGEX,
+            exact, contain, regex,
         }
 
     }
@@ -96,15 +96,15 @@ public class PageParam<P> implements Serializer {
         @NotEmpty
         private String property;
 
-        @Schema(title = "direction", description = "方向", example = "ASC")
+        @Schema(title = "direction", description = "方向", example = "asc")
         @NotNull
-        // @Pattern(regexp = "^(ASC|DESC)$")
-        private Direction direction = Direction.ASC;
+        // @Pattern(regexp = "^(asc|desc)$")
+        private Direction direction = Direction.asc;
 
         public static Order by(String property) {
             Order order = new Order();
             order.setProperty(property);
-            order.setDirection(Direction.ASC);
+            order.setDirection(Direction.asc);
             return order;
         }
 
@@ -116,7 +116,7 @@ public class PageParam<P> implements Serializer {
         }
 
         public enum Direction {
-            ASC, DESC
+            asc, desc
         }
 
     }

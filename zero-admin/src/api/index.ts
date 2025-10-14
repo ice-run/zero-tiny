@@ -48,14 +48,14 @@ export type Match = {
   /** 匹配字段 */
   property: string;
   /** 匹配模式 */
-  mode: "EXACT" | "CONTAIN" | "REGEX";
+  mode: "exact" | "contain" | "regex";
 };
 
 export type Order = {
   /** 排序字段 */
   property: string;
   /** 排序方式 */
-  direction: "ASC" | "DESC";
+  direction: "asc" | "desc";
 };
 
 export type IdParam = {
