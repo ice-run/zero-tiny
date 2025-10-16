@@ -1,0 +1,5 @@
+include:
+  - ./mysql/compose.yaml
+  - ./redis/compose.yaml
+  - ./zero-server/compose.yaml
+  - ./zero-admin/compose.yaml

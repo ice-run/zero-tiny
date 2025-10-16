@@ -361,6 +361,19 @@ create_network() {
   fi
 }
 
+# 创建数据目录函数
+create_volume() {
+  local volume_name="$1";
+  log_info "检查 Docker 数据目录 ${volume_name} ..."
+  if docker volume inspect "${volume_name}" &>/dev/null; then
+    log_debug "Docker 数据目录 ${volume_name} 已存在"
+  else
+    log_info "创建 Docker 数据目录 ${volume_name} ..."
+    docker volume create --driver local --opt type=none --opt device="${DATA_DIR}" --opt o=bind "${volume_name}" || log_error "创建 Docker 数据目录 ${volume_name} 失败！"
+    log_debug "创建 Docker 数据目录 ${volume_name} 成功！"
+  fi
+}
+
 # 准备镜像函数
 prepare_image() {
   [ "$IMAGE_MODE" = "skip" ] && { log_info "skip 跳过构建镜像"; return 0; }

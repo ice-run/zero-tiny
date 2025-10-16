@@ -18,7 +18,7 @@ services:
         order: start-first
         failure_action: rollback
     volumes:
-      - logs:/logs/zero-server
+      - logs-zero-server:/logs/zero-server
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00"
@@ -39,10 +39,5 @@ networks:
     external: true
 
 volumes:
-  logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /logs/zero-server
-
+  logs-zero-server:
+    external: true
