@@ -1,9 +1,6 @@
-name: ${APPLICATION}
-
 services:
   zero-admin:
-    container_name: ${APPLICATION}
-    image: ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}
+    image: crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com/ice-run-open/zero-admin:tiny-latest
     deploy:
       resources:
         limits:
@@ -23,11 +20,10 @@ services:
       - ../.env
       - .env
     labels:
-      namespace: ${NAMESPACE}
-      application: ${APPLICATION}
+      namespace: zero
+      application: zero-admin
     networks:
-      - ${NETWORK}
-    restart: always
+      - zero
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
 

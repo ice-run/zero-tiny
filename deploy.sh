@@ -107,6 +107,15 @@ check_docker() {
     DOCKER_COMPOSE="docker compose"
   fi
 
+  log_debug "检查 Docker swarm 模式..."
+  if ! docker info | grep 'Swarm: active'; then
+    log_info "Docker Swarm 未激活，正在初始化..."
+    docker swarm init || log_error "初始化 Docker Swarm 失败！"
+    log_debug "Docker Swarm 初始化成功"
+  else
+    log_debug "Docker Swarm 已激活"
+  fi
+
   log_debug "Docker 环境检查通过"
 }
 
@@ -347,7 +356,7 @@ create_network() {
     log_debug "Docker 网络 ${NETWORK} 已存在"
   else
     log_info "创建 Docker 网络 ${NETWORK} ..."
-    docker network create "${NETWORK}" || log_error "创建 Docker 网络 ${NETWORK} 失败！"
+    docker network create --driver overlay "${NETWORK}" || log_error "创建 Docker 网络 ${NETWORK} 失败！"
     log_debug "创建 Docker 网络 ${NETWORK} 成功！"
   fi
 }
@@ -481,8 +490,10 @@ deploy_service() {
     # 检查 Compose 文件是否存在
     [ ! -f "$COMPOSE_FILE" ] && log_error "Docker Compose 文件 '$COMPOSE_FILE' 不存在"
 
-    log_debug "执行 Docker Compose..."
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
+    # log_debug "执行 Docker Compose..."
+    # $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
+    log_debug "执行 Docker Stack..."
+    docker stack deploy -c "$COMPOSE_FILE" "$service" || log_error "执行 Docker Stack 失败"
     log_info "服务容器 ${service} 创建成功！"
   fi
 }
@@ -523,8 +534,10 @@ deploy_application() {
   # 检查 Compose 文件是否存在
   [ ! -f "$COMPOSE_FILE" ] && log_error "Docker Compose 文件 '$COMPOSE_FILE' 不存在"
 
-  log_debug "执行 Docker Compose..."
-  $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
+  #log_debug "执行 Docker Compose..."
+  #$DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
+  log_debug "执行 Docker Stack..."
+  docker stack deploy -c "$COMPOSE_FILE" "$application" || log_error "执行 Docker Stack 失败"
   log_info "应用容器 ${application} 创建成功！"
 }
 

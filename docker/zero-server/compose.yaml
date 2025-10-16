@@ -1,8 +1,6 @@
-name: ${APPLICATION}
-
 services:
   zero-server:
-    image: ${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}
+    image: crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com/ice-run-open/zero-server:tiny-latest
     deploy:
       mode: replicated
       replicas: 1
@@ -14,8 +12,13 @@ services:
         reservations:
           cpus: "0.2"
           memory: 256M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
     volumes:
-      - logs:/logs/${APPLICATION}
+      - logs:/logs/zero-server
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00"
@@ -23,12 +26,11 @@ services:
       - ../.env
       - .env
     labels:
-      namespace: ${NAMESPACE}
-      application: ${APPLICATION}
+      namespace: zero
+      application: zero-server
       framework: spring-boot
     networks:
-      - ${NETWORK}
-    restart: always
+      - zero
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
 
@@ -42,5 +44,5 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${LOGS_DIR}/${APPLICATION}
+      device: /logs/zero-server
 

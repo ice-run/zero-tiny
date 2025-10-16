@@ -1,9 +1,6 @@
-name: mysql
-
 services:
   mysql:
-    container_name: mysql
-    image: registry.cn-beijing.aliyuncs.com/daodao-bot/mysql:${MYSQL_TAG}
+    image: registry.cn-beijing.aliyuncs.com/daodao-bot/mysql:9.4.0
     deploy:
       resources:
         limits:
@@ -27,7 +24,6 @@ services:
       - --collation-server=utf8mb4_bin
     networks:
       - zero
-    restart: always
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
 
@@ -41,4 +37,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_DIR}/mysql
+      device: /data/mysql
