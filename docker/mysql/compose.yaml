@@ -13,12 +13,18 @@ services:
       - "3306:3306"
     volumes:
       - data-mysql:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      #- ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    configs:
+      - source: mysql_init_sql
+        target: /docker-entrypoint-initdb.d/init.sql
+    secrets:
+      - mysql_password
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00.000"
-    env_file:
-      - .env
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_password
+    #env_file:
+    #  - .env
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_bin
@@ -26,6 +32,14 @@ services:
       - zero
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+
+secrets:
+  mysql_password:
+    file: /app/mysql/password.txt
+
+configs:
+  mysql_init_sql:
+    file: /app/mysql/init.sql
 
 networks:
   zero:

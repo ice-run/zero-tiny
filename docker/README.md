@@ -30,7 +30,7 @@ docker swarm init
 ### 创建 overlay 网络
 
 ```shell
-docker network create -d overlay zero
+docker network create -driver overlay zero
 ```
 
 ### 创建数据卷
@@ -40,11 +40,14 @@ docker network create -d overlay zero
 如果是集群模式，建议使用 NFS 存储数据。
 
 ```shell
-docker volume create --driver local --opt type=none --opt device="${DATA_DIR}/mysql" --opt o=bind "data-mysql"
+docker volume create --driver local --opt type=none --opt o=bind --opt device="${DATA_DIR}/mysql" "data-mysql"
+
+## nfs
+docker volume create --driver local --opt type=nfs --opt o=addr=192.168.1.1,rw --opt device=:/data/zero/mysql "data-mysql"
 ```
 
 ### 部署服务
 
 ```shell
-docker stack deploy -c docker-compose.yml zero
+docker stack deploy -c compose.yaml zero
 ```

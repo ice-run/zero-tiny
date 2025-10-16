@@ -8,6 +8,7 @@ spring:
       - optional:classpath:application-common.yaml
       - optional:classpath:application-mysql.yaml
       - optional:classpath:application-redis.yaml
+      - optional:file:/application-zero.yaml
 
 app:
   slogan: ${APP_SLOGAN:冰点稳定，极速运行！}

@@ -18,13 +18,25 @@ services:
         order: start-first
         failure_action: rollback
     volumes:
-      - logs-zero-server:/logs/zero-server
+      - logs:/logs
+    configs:
+      - source: zero-server_application-zero.yaml
+        target: /application-zero.yaml
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00"
-    env_file:
-      - ../.env
-      - .env
+      SERVER_PORT: 80
+      MYSQL_URL: jdbc:mysql://mysql:3306/zero_tiny
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME:
+      REDIS_PASSWORD: redis
+      REDIS_DATABASE: 1
+#    env_file:
+#      - ../.env
+#      - .env
     labels:
       namespace: zero
       application: zero-server
@@ -34,10 +46,14 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
 
+configs:
+  zero-server_application-zero.yaml:
+    file: /app/zero-server/application-zero.yaml
+
 networks:
   zero:
     external: true
 
 volumes:
-  logs-zero-server:
+  logs:
     external: true

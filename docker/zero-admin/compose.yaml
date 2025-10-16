@@ -11,14 +11,17 @@ services:
           memory: 64M
     ports:
       - "80:80"
-    volumes:
-      - ./conf.d:/etc/nginx/conf.d
+    #volumes:
+    #  - ./conf.d:/etc/nginx/conf.d
+    configs:
+      - source: zero-admin_default_conf
+        target: /etc/nginx/conf.d/default.conf
     environment:
       TZ: Asia/Shanghai
       DT: "2025-01-01T00:00:00"
-    env_file:
-      - ../.env
-      - .env
+    #env_file:
+    #  - ../.env
+    #  - .env
     labels:
       namespace: zero
       application: zero-admin
@@ -26,6 +29,10 @@ services:
       - zero
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
+
+configs:
+  zero-admin_default_conf:
+    file: /app/zero-admin/conf.d/default.conf
 
 networks:
   zero:
