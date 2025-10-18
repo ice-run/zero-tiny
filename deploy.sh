@@ -18,6 +18,7 @@ log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1";
 # 默认配置变量
 COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
+PASSWORD_FILE="password.txt"
 IMAGE_MODE="pull"
 
 ZERO_DOCKER_REGISTRY=""
@@ -250,10 +251,10 @@ parse_env() {
 
 # 设置密码函数
 set_password() {
-  # 优先从 ${ZERO_DIR}/conf/mysql/password.txt 或 docker/${ENV_FILE} 读取已存在的 MYSQL_PASSWORD
+  # 优先从 ${ZERO_DIR}/conf/mysql/${PASSWORD_FILE} 或 docker/${ENV_FILE} 读取已存在的 MYSQL_PASSWORD
   if [ -z "$MYSQL_PASSWORD" ]; then
-    if [ -f "${ZERO_DIR}/conf/mysql/password.txt" ]; then
-      MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/password.txt")
+    if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
+      MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
     elif [ -f "docker/${ENV_FILE}" ]; then
       MYSQL_PASSWORD=$(grep -E '^MYSQL_PASSWORD=' "docker/${ENV_FILE}" | cut -d'=' -f2-)
     fi
@@ -286,10 +287,10 @@ set_password() {
   fi
 
 
-  # 优先从 ${ZERO_DIR}/conf/redis/password.txt 或 docker/${ENV_FILE} 读取已存在的 REDIS_PASSWORD
+  # 优先从 ${ZERO_DIR}/conf/redis/${PASSWORD_FILE} 或 docker/${ENV_FILE} 读取已存在的 REDIS_PASSWORD
   if [ -z "$REDIS_PASSWORD" ]; then
-    if [ -f "${ZERO_DIR}/conf/redis/password.txt" ]; then
-      REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/password.txt")
+    if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
+      REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
     elif [ -f "docker/${ENV_FILE}" ]; then
       REDIS_PASSWORD=$(grep -E '^REDIS_PASSWORD=' "docker/${ENV_FILE}" | cut -d'=' -f2-)
     fi
@@ -340,16 +341,6 @@ create_dir() {
     fi
   done
 
-
-  # 复制 update.sh 文件到 APP_DIR
-  if [ ! -f "${ZERO_DIR}/conf/update.sh" ]; then
-    log_info "复制 update.sh 文件到 ${ZERO_DIR}/conf ..."
-    cp "${WORK_DIR}/docker/update.sh" "${ZERO_DIR}/conf/" || log_error "复制 update.sh 文件失败！"
-    chmod +x "${ZERO_DIR}/conf/update.sh" || log_warn "设置 update.sh 文件权限失败！"
-    log_debug "update.sh 文件复制成功"
-  else
-    log_debug "update.sh 文件已存在: ${ZERO_DIR}/conf/update.sh"
-  fi
 
   # 将 docker 目录中的所有文件，包括子目录和隐藏文件，复制到 ${ZERO_DIR}/conf
   log_info "复制 docker 目录中的所有文件到 ${ZERO_DIR}/conf ..."
@@ -622,7 +613,8 @@ docker_deploy() {
   sed -i "s|ZERO_DOCKER_REGISTRY=.*|${ZERO_DOCKER_REGISTRY}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_DOCKER_REGISTRY 变量失败！"
   sed -i "s|ZERO_REGISTRY_NAMESPACE=.*|${ZERO_REGISTRY_NAMESPACE}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_REGISTRY_NAMESPACE 变量失败！"
   sed -i "s|ZERO_IMAGE_TAG=.*|${ZERO_IMAGE_TAG}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_IMAGE_TAG 变量失败！"
-  sed -i "s|.*|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/mysql/password.txt" || log_error "替换 MYSQL_PASSWORD 变量失败！"
+  sed -i "s|.*|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
+  sed -i "s|.*|${REDIS_PASSWORD}|" "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
   sed -i "s|\${MYSQL_PASSWORD}|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
   sed -i "s|\${REDIS_PASSWORD}|${REDIS_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
   sed -i "s|\${ZERO_NFS_HOST}|${ZERO_NFS_HOST}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_NFS_HOST 变量失败！"
@@ -708,7 +700,7 @@ main() {
   cd "${ZERO_DIR}/conf/" || log_error "切换到 ${ZERO_DIR}/conf/ 目录失败"
 
   log_info "部署成功！！！"
-  log_info "查看容器状态： docker ps -a"
+  log_info "查看容器状态： docker service ls"
 
   log_info "尝试访问网站： http://${HOST_IP}:80"
 
@@ -717,5 +709,4 @@ main() {
 # 执行主函数
 main "$@"
 
-# 启动一个新的 shell 在 APP_DIR 目录
 /bin/bash

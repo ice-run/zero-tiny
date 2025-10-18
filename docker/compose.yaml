@@ -55,7 +55,7 @@ services:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
 
   server:
-    image: crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com/ice-run-open/zero-server:tiny-latest
+    image: ${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/zero-server:${ZERO_IMAGE_TAG}
     deploy:
       mode: replicated
       replicas: 1
@@ -75,7 +75,7 @@ services:
     volumes:
       - logs-server:/logs
     configs:
-      - source: server-application-zero.yaml
+      - source: server-application-zero
         target: /application-zero.yaml
     environment:
       TZ: Asia/Shanghai
@@ -91,7 +91,7 @@ services:
       REDIS_DATABASE: 1
     labels:
       namespace: zero
-      application: zero-server
+      application: server
       framework: spring-boot
     networks:
       - zero
@@ -99,7 +99,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
 
   admin:
-    image: crpi-lqf79pij6cz4kaey.cn-beijing.personal.cr.aliyuncs.com/ice-run-open/zero-admin:tiny-latest
+    image: ${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/zero-admin:${ZERO_IMAGE_TAG}
     deploy:
       resources:
         limits:
@@ -118,7 +118,7 @@ services:
       DT: "2025-01-01T00:00:00"
     labels:
       namespace: zero
-      application: zero-admin
+      application: admin
     networks:
       - zero
     healthcheck:
@@ -131,7 +131,7 @@ secrets:
 configs:
   mysql-init-sql:
     file: ${ZERO_DIR}/conf/mysql/init.sql
-  server-application-zero.yaml:
+  server-application-zero:
     file: ${ZERO_DIR}/conf/server/application-zero.yaml
   admin-nginx-conf:
     file: ${ZERO_DIR}/conf/admin/nginx.conf
