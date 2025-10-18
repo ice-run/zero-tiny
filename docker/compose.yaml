@@ -142,19 +142,19 @@ volumes:
     driver_opts:
       type: "nfs"
       o: "addr=${ZERO_NFS_HOST},rw"
-      device: "${ZERO_DIR}/data/mysql"
+      device: ":${ZERO_DIR}/data/mysql"
   data-redis:
     driver: local
     driver_opts:
       type: "nfs"
       o: "addr=${ZERO_NFS_HOST},rw"
-      device: "${ZERO_DIR}/data/redis"
+      device: ":${ZERO_DIR}/data/redis"
   logs-server:
     driver: local
     driver_opts:
       type: "nfs"
       o: "addr=${ZERO_NFS_HOST},rw"
-      device: "${ZERO_DIR}/logs/server"
+      device: ":${ZERO_DIR}/logs/server"
 
 networks:
   zero:

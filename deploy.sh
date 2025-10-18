@@ -165,7 +165,8 @@ check_docker() {
     log_warn "未找到 Docker 命令。请确保 Docker 已安装并添加到 PATH 中。
     可以使用以下命令安装 Docker：
     curl -fsSL https://get.docker.com | sudo sh
-    参考 Docker 官方文档： https://docs.docker.com/engine/install/"
+    参考 Docker 官方文档： https://docs.docker.com/engine/install/
+    如果出现网络错误，可以尝试多次重试，或者手动安装 Docker。"
     # 交互式安装 Docker
     read -r -p "是否要安装 Docker？(Y/N，默认Y): " install_docker
     if [[ -z "$install_docker" || "$install_docker" =~ ^[Yy]$ ]]; then
@@ -339,18 +340,6 @@ create_dir() {
     fi
   done
 
-  # 复制 ${ENV_FILE} 文件到 APP_DIR
-  if [ ! -f "${ZERO_DIR}/conf/${ENV_FILE}" ]; then
-    log_info "复制 ${ENV_FILE} 文件到 ${ZERO_DIR}/conf ..."
-    cp "${WORK_DIR}/docker/${ENV_FILE}" "${ZERO_DIR}/conf/" || log_error "复制 ${ENV_FILE} 文件失败！"
-    chmod 644 "${ZERO_DIR}/conf/${ENV_FILE}" || log_warn "设置 ${ENV_FILE} 文件权限失败！"
-    log_debug "${ENV_FILE} 文件复制成功"
-  else
-    log_debug "${ENV_FILE} 文件已存在: ${ZERO_DIR}/conf/${ENV_FILE}"
-  fi
-
-  # 替换环境变量
-  replace_envs
 
   # 复制 update.sh 文件到 APP_DIR
   if [ ! -f "${ZERO_DIR}/conf/update.sh" ]; then
@@ -361,6 +350,35 @@ create_dir() {
   else
     log_debug "update.sh 文件已存在: ${ZERO_DIR}/conf/update.sh"
   fi
+
+  # 将 docker 目录中的所有文件，包括子目录和隐藏文件，复制到 ${ZERO_DIR}/conf
+  log_info "复制 docker 目录中的所有文件到 ${ZERO_DIR}/conf ..."
+  cp -R "${WORK_DIR}/docker/"* "${ZERO_DIR}/conf/" || log_error "复制 docker 目录文件失败！"
+  log_debug "docker 目录文件复制成功"
+
+  # 创建 ${ZERO_DIR}/data/mysql 目录
+  log_info "创建 ${ZERO_DIR}/data/mysql 目录..."
+  mkdir -p "${ZERO_DIR}/data/mysql" || log_error "创建 ${ZERO_DIR}/data/mysql 目录失败！"
+  chmod 755 "${ZERO_DIR}/data/mysql" || log_warn "设置 ${ZERO_DIR}/data/mysql 目录权限失败！"
+  log_debug "${ZERO_DIR}/data/mysql 目录创建成功"
+
+  # 创建 ${ZERO_DIR}/data/redis 目录
+  log_info "创建 ${ZERO_DIR}/data/redis 目录..."
+  mkdir -p "${ZERO_DIR}/data/redis" || log_error "创建 ${ZERO_DIR}/data/redis 目录失败！"
+  chmod 755 "${ZERO_DIR}/data/redis" || log_warn "设置 ${ZERO_DIR}/data/redis 目录权限失败！"
+  log_debug "${ZERO_DIR}/data/redis 目录创建成功"
+
+  # 创建 ${ZERO_DIR}/data/server 目录
+  log_info "创建 ${ZERO_DIR}/data/server 目录..."
+  mkdir -p "${ZERO_DIR}/data/server" || log_error "创建 ${ZERO_DIR}/data/server 目录失败！"
+  chmod 755 "${ZERO_DIR}/data/server" || log_warn "设置 ${ZERO_DIR}/data/server 目录权限失败！"
+  log_debug "${ZERO_DIR}/data/server 目录创建成功"
+
+  # 创建 ${ZERO_DIR}/logs/server 目录
+  log_info "创建 ${ZERO_DIR}/logs/server 目录..."
+  mkdir -p "${ZERO_DIR}/logs/server" || log_error "创建 ${ZERO_DIR}/logs/server 目录失败！"
+  chmod 777 "${ZERO_DIR}/logs/server" || log_warn "设置 ${ZERO_DIR}/logs/server 目录权限失败！"
+  log_debug "${ZERO_DIR}/logs/server 目录创建成功"
 }
 
 # 判断包是否已安装
@@ -513,41 +531,6 @@ create_nfs() {
 
 }
 
-# 替换环境变量
-replace_envs() {
-  # 将目录中的 ${ENV_FILE} 文件中的变量替换为实际值 APP_DIR=${ZERO_DIR}/conf DATA_DIR=${ZERO_DIR}/data LOGS_DIR=${ZERO_DIR}/logs
-  log_debug "替换 ${ENV_FILE} 文件中的变量..."
-  sed -i "s|APP_DIR=.*|APP_DIR=${ZERO_DIR}/conf|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 APP_DIR 变量失败！"
-  sed -i "s|DATA_DIR=.*|DATA_DIR=${ZERO_DIR}/data|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 DATA_DIR 变量失败！"
-  sed -i "s|LOGS_DIR=.*|LOGS_DIR=${ZERO_DIR}/logs|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 LOGS_DIR 变量失败！"
-  sed -i "s|CODE_DIR=.*|CODE_DIR=${WORK_DIR}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 CODE_DIR 变量失败！"
-  sed -i "s|ZERO_DOCKER_REGISTRY=.*|ZERO_DOCKER_REGISTRY=${ZERO_DOCKER_REGISTRY}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 ZERO_DOCKER_REGISTRY 变量失败！"
-  sed -i "s|ZERO_REGISTRY_NAMESPACE=.*|ZERO_REGISTRY_NAMESPACE=${ZERO_REGISTRY_NAMESPACE}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 ZERO_REGISTRY_NAMESPACE 变量失败！"
-  sed -i "s|ZERO_IMAGE_TAG=.*|ZERO_IMAGE_TAG=${ZERO_IMAGE_TAG}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 ZERO_IMAGE_TAG 变量失败！"
-  sed -i "s|MYSQL_PASSWORD=.*|MYSQL_PASSWORD=${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
-  sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
-  log_debug "${ENV_FILE} 文件中的变量替换成功！"
-}
-
-# 替换变量
-replace_vars() {
-  # 将目录中的 ${ENV_FILE} 文件中的变量替换为实际值 APP_DIR=${ZERO_DIR}/conf DATA_DIR=${ZERO_DIR}/data LOGS_DIR=${ZERO_DIR}/logs
-  log_debug "替换 ${ENV_FILE} 文件中的变量..."
-  sed -i "s|APP_DIR=.*|APP_DIR=${ZERO_DIR}/conf|" "${ENV_FILE}" || log_error "替换 APP_DIR 变量失败！"
-  sed -i "s|DATA_DIR=.*|DATA_DIR=${ZERO_DIR}/data|" "${ENV_FILE}" || log_error "替换 DATA_DIR 变量失败！"
-  sed -i "s|LOGS_DIR=.*|LOGS_DIR=${ZERO_DIR}/logs|" "${ENV_FILE}" || log_error "替换 LOGS_DIR 变量失败！"
-  sed -i "s|ZERO_DOCKER_REGISTRY=.*|ZERO_DOCKER_REGISTRY=${ZERO_DOCKER_REGISTRY}|" "${ENV_FILE}" || log_error "替换 ZERO_DOCKER_REGISTRY 变量失败！"
-  sed -i "s|ZERO_REGISTRY_NAMESPACE=.*|ZERO_REGISTRY_NAMESPACE=${ZERO_REGISTRY_NAMESPACE}|" "${ENV_FILE}" || log_error "替换 ZERO_REGISTRY_NAMESPACE 变量失败！"
-  sed -i "s|ZERO_IMAGE_TAG=.*|ZERO_IMAGE_TAG=${ZERO_IMAGE_TAG}|" "${ENV_FILE}" || log_error "替换 ZERO_IMAGE_TAG 变量失败！"
-  sed -i "s|MYSQL_PASSWORD=.*|MYSQL_PASSWORD=${MYSQL_PASSWORD}|" "${ENV_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
-  sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${REDIS_PASSWORD}|" "${ENV_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
-  log_debug "${ENV_FILE} 文件中的变量替换成功！"
-  # 修改部署时间
-  log_debug "替换 ${COMPOSE_FILE} 文件中的变量..."
-  sed -i "s/DT: \".*\"/DT: \"$(date '+%Y-%m-%dT%H:%M:%S')\"/g" "${COMPOSE_FILE}" || log_error "替换 ${COMPOSE_FILE} 文件中的 DT 变量失败！"
-  log_debug "${COMPOSE_FILE} 文件中的变量替换成功！"
-}
-
 # 创建网络函数
 create_network() {
   log_info "检查 Docker 网络 ${ZERO_NAMESPACE} ..."
@@ -557,19 +540,6 @@ create_network() {
     log_info "创建 Docker 网络 ${ZERO_NAMESPACE} ..."
     docker network create --driver overlay "${ZERO_NAMESPACE}" || log_error "创建 Docker 网络 ${ZERO_NAMESPACE} 失败！"
     log_debug "创建 Docker 网络 ${ZERO_NAMESPACE} 成功！"
-  fi
-}
-
-# 创建数据目录函数
-create_volume() {
-  local volume_name="$1";
-  log_info "检查 Docker 数据目录 ${volume_name} ..."
-  if docker volume inspect "${volume_name}" &>/dev/null; then
-    log_debug "Docker 数据目录 ${volume_name} 已存在"
-  else
-    log_info "创建 Docker 数据目录 ${volume_name} ..."
-    docker volume create --driver local --opt type=none --opt device="${ZERO_DIR}/data" --opt o=bind "${volume_name}" || log_error "创建 Docker 数据目录 ${volume_name} 失败！"
-    log_debug "创建 Docker 数据目录 ${volume_name} 成功！"
   fi
 }
 
@@ -644,117 +614,18 @@ build_image() {
   "${WORK_DIR}/build.sh" "${image_name}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
 }
 
-# 部署服务函数
-deploy_service() {
-  local service="$1";
-  log_info "准备部署服务 ${service} ..."
-
-  # 进入工作目录
-  log_debug "切换到工作目录 ${WORK_DIR} ..."
-  cd "${WORK_DIR}" || log_error "切换到工作目录 ${WORK_DIR} 失败"
-
-  # 检查服务容器是否存在
-  if docker ps -a --filter "name=${service}" --format "{{.ID}}" | grep -q .; then
-    log_debug "服务容器 ${service} 已存在，跳过部署"
-  else
-    log_debug "创建服务容器 ${service} ..."
-    # 创建 conf & data & logs 目录
-    # 如果不存在，则创建，并赋予权限
-    for dir in "${ZERO_DIR}/conf" "${ZERO_DIR}/data" "${ZERO_DIR}/logs"; do
-      if [ ! -d "${dir}/${service}" ]; then
-        log_debug "创建目录 ${dir}/${service} ..."
-        mkdir -p "${dir}/${service}" || log_error "创建目录 ${dir}/${service} 失败！"
-        chmod 755 "${dir}/${service}" || log_warn "设置目录 ${dir}/${service} 权限失败！"
-        log_debug "目录 ${dir}/${service} 创建成功"
-      else
-        log_debug "目录 ${dir}/${service} 已存在"
-      fi
-    done
-
-    # 复制所有文件（包括隐藏文件）
-    cp -r "docker/${service}/." "${ZERO_DIR}/conf/${service}/" || log_error "复制 ${service} 相关文件失败！"
-
-    # 切换到 conf 目录
-    log_debug "切换到 ${ZERO_DIR}/conf/${service} 目录..."
-    cd "${ZERO_DIR}/conf/${service}/" || log_error "切换到 ${ZERO_DIR}/conf/${service} 目录失败"
-
-    # 替换变量
-    replace_vars
-    # 如果是 mysql，则需要替换密码
-    if [ "$service" = "mysql" ]; then
-      sed -i "s|MYSQL_ROOT_PASSWORD=.*|MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}|" "${ENV_FILE}" || log_error "替换 MYSQL_ROOT_PASSWORD 变量失败！"
-      # 如果 cpu 不支持 x86-64-v2 指令集，则尝试使用低版本镜像
-      if ! check_x86_64_v2; then
-        log_warn "CPU 不支持 x86-64-v2 指令集，尝试使用 mysql:8.0.27 镜像"
-        sed -i "s|MYSQL_TAG=.*|MYSQL_TAG=8.0.27|" "${ENV_FILE}" || log_error "替换 MySQL 镜像失败！"
-      fi
-    fi
-
-    # 检查 Compose 文件是否存在
-    [ ! -f "$COMPOSE_FILE" ] && log_error "Docker Compose 文件 '$COMPOSE_FILE' 不存在"
-
-    # log_debug "执行 Docker Compose..."
-    # $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
-    log_debug "执行 Docker Stack..."
-    docker stack deploy -c "$COMPOSE_FILE" "$service" || log_error "执行 Docker Stack 失败"
-    log_info "服务容器 ${service} 创建成功！"
-  fi
-}
-
-# 部署应用函数
-deploy_application() {
-  local application="$1";
-  log_info "准备部署应用 ${application} ..."
-
-  # 进入工作目录
-  log_debug "切换到工作目录 ${WORK_DIR} ..."
-  cd "${WORK_DIR}" || log_error "切换到工作目录 ${WORK_DIR} 失败！"
-
-  # 创建 conf & data & logs 目录
-  # 如果不存在，则创建，并赋予权限
-  for dir in "${ZERO_DIR}/conf" "${ZERO_DIR}/data" "${ZERO_DIR}/logs"; do
-    if [ ! -d "${dir}/${application}" ]; then
-      log_debug "创建目录 ${dir}/${application} ..."
-      mkdir -p "${dir}/${application}" || log_error "创建目录 ${dir}/${application} 失败！"
-      chmod 755 "${dir}/${application}" || log_warn "设置目录 ${dir}/${application} 权限失败！"
-      log_debug "目录 ${dir}/${application} 创建成功"
-    else
-      log_debug "目录 ${dir}/${application} 已存在"
-    fi
-  done
-
-  # 复制所有文件（包括隐藏文件）
-  log_debug "复制应用 ${application} 的编排文件 ..."
-  cp -r "docker/${application}/." "${ZERO_DIR}/conf/${application}/" || log_error "复制 ${application} 编排文件失败！"
-
-  # 切换到 conf 目录
-  log_debug "切换到 ${ZERO_DIR}/conf/${application} 目录..."
-  cd "${ZERO_DIR}/conf/${application}/" || log_error "切换到 ${ZERO_DIR}/conf/${application} 目录失败"
-
-  # 替换变量
-  replace_vars
-
-  # 检查 Compose 文件是否存在
-  [ ! -f "$COMPOSE_FILE" ] && log_error "Docker Compose 文件 '$COMPOSE_FILE' 不存在"
-
-  #log_debug "执行 Docker Compose..."
-  #$DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d || log_error "执行 Docker Compose 失败"
-  log_debug "执行 Docker Stack..."
-  docker stack deploy -c "$COMPOSE_FILE" "$application" || log_error "执行 Docker Stack 失败"
-  log_info "应用容器 ${application} 创建成功！"
-}
-
 # Docker 部署
 docker_deploy() {
 
   log_debug "替换 ${COMPOSE_FILE} 文件中的变量..."
-  sed -i "s|\$\{ZERO_DIR\}|${ZERO_DIR}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_DIR 变量失败！"
+  sed -i "s|\${ZERO_DIR}|${ZERO_DIR}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_DIR 变量失败！"
   sed -i "s|ZERO_DOCKER_REGISTRY=.*|${ZERO_DOCKER_REGISTRY}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_DOCKER_REGISTRY 变量失败！"
   sed -i "s|ZERO_REGISTRY_NAMESPACE=.*|${ZERO_REGISTRY_NAMESPACE}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_REGISTRY_NAMESPACE 变量失败！"
   sed -i "s|ZERO_IMAGE_TAG=.*|${ZERO_IMAGE_TAG}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_IMAGE_TAG 变量失败！"
   sed -i "s|.*|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/mysql/password.txt" || log_error "替换 MYSQL_PASSWORD 变量失败！"
-  sed -i "s|\$\{MYSQL_PASSWORD\}|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
-  sed -i "s|\$\{REDIS_PASSWORD\}|${REDIS_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
+  sed -i "s|\${MYSQL_PASSWORD}|${MYSQL_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 MYSQL_PASSWORD 变量失败！"
+  sed -i "s|\${REDIS_PASSWORD}|${REDIS_PASSWORD}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 REDIS_PASSWORD 变量失败！"
+  sed -i "s|\${ZERO_NFS_HOST}|${ZERO_NFS_HOST}|" "${ZERO_DIR}/conf/${COMPOSE_FILE}" || log_error "替换 ZERO_NFS_HOST 变量失败！"
   log_debug "${COMPOSE_FILE} 文件中的变量替换成功！"
 
   log_info "准备进行 Docker 部署..."
@@ -828,22 +699,6 @@ main() {
 
   # 准备镜像
   prepare_image
-
-  # 部署服务
-#  deploy_service "mysql"
-#  deploy_service "redis"
-
-  # 部署后端应用
-#  deploy_application "zero-server"
-
-  # 部署前端应用
-#  deploy_application "zero-admin"
-
-  # 检查服务健康状态
-#  service_health_check "mysql"
-#  service_health_check "redis"
-#  service_health_check "zero-server"
-#  service_health_check "zero-admin"
 
   # 部署
   docker_deploy
