@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author DaoDao
  */
 @SpringBootApplication
-public class ZeroServerApplication {
+public class ServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ZeroServerApplication.class, args);
+        SpringApplication.run(ServerApplication.class, args);
     }
 
 }
