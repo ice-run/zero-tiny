@@ -1,11 +1,11 @@
-name: zero-server
+name: admin
 
 on:
   push:
     tags:
       - '2*'
     paths:
-      - 'zero-server/**'
+      - 'admin/**'
 
 jobs:
 
@@ -19,14 +19,15 @@ jobs:
       REGISTRY_NAMESPACE: ice-run-open
       REGISTRY_USERNAME: ${{ secrets.ALIYUN_CR_ICE_RUN_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.ALIYUN_CR_ICE_RUN_PASSWORD }}
-      IMAGE_NAME: zero-server
+      CONTEXT_PATH: ./admin
+      IMAGE_NAME: zero-admin
       IMAGE_TAG: tiny-latest
 
     steps:
       - uses: actions/checkout@main
 
       - name: Build the Docker image
-        run: docker build ./$IMAGE_NAME --file ./$IMAGE_NAME/Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
+        run: docker build $CONTEXT_PATH --file $CONTEXT_PATH/Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
 
       - name: Login Docker Registry
         run: docker login $REGISTRY_URL -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD

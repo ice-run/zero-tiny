@@ -1,6 +1,6 @@
 version: '1.0'
-name: zero-admin
-displayName: zero-admin
+name: admin
+displayName: admin
 triggers:
   trigger: auto
   push:
@@ -9,11 +9,12 @@ triggers:
         - 2
     paths:
       include:
-        - ^zero-admin/.*$
+        - ^admin/.*$
 variables:
   REGISTRY_NAMESPACE: ice-run-open
   NAMESPACE: zero
-  APPLICATION: zero-admin
+  IMAGE_NAME: zero-admin
+  CONTEXT_PATH: ./admin
 stages:
 # 前端工程扫码太慢了！！！
 #  - name: scan
@@ -25,7 +26,7 @@ stages:
 #      - step: sc@opensca
 #        name: open_sca
 #        displayName: OpenSCA 检测
-#        detectPath: ./${APPLICATION}
+#        detectPath: ${CONTEXT_PATH}
 #        notify: []
 #        strategy:
 #          retry: '0'
@@ -40,9 +41,9 @@ stages:
         displayName: 构建镜像
         type: cert
         certificate: aliyun-cr-ice-run
-        tag: ${REGISTRY_NAMESPACE}/${APPLICATION}:tiny-${GITEE_BRANCH}
-        dockerfile: ./${APPLICATION}/Dockerfile
-        context: ./${APPLICATION}
+        tag: ${REGISTRY_NAMESPACE}/${IMAGE_NAME}:tiny-${GITEE_BRANCH}
+        dockerfile: ${CONTEXT_PATH}/Dockerfile
+        context: ${CONTEXT_PATH}
         artifacts: []
         isCache: false
         parameter: {}
