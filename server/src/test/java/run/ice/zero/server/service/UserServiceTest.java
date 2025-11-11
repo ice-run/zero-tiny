@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import run.ice.zero.server.ZeroServerApplicationTest;
+import run.ice.zero.server.ServerApplicationTest;
 
 @Slf4j
-class UserServiceTest extends ZeroServerApplicationTest {
+class UserServiceTest extends ServerApplicationTest {
 
     @Resource
     private PasswordEncoder passwordEncoder;

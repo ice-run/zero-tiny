@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
-import run.ice.zero.server.ZeroServerApplicationTest;
+import run.ice.zero.server.ServerApplicationTest;
 import run.ice.zero.server.helper.TokenHelper;
 import run.ice.zero.server.model.Request;
 import run.ice.zero.server.model.Response;
@@ -14,7 +14,7 @@ import run.ice.zero.server.model.demo.Dog;
 import tools.jackson.core.type.TypeReference;
 
 @Slf4j
-class DemoControllerTest extends ZeroServerApplicationTest {
+class DemoControllerTest extends ServerApplicationTest {
 
     @Resource
     private TokenHelper tokenHelper;

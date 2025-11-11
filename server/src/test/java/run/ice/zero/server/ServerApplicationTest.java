@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -32,9 +31,9 @@ import java.nio.charset.Charset;
 @Rollback
 @Transactional
 @ActiveProfiles("local")
-@AutoConfigureMockMvc
+// @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ZeroServerApplicationTest {
+public class ServerApplicationTest {
 
     private String uri;
     private HttpHeaders httpHeaders;

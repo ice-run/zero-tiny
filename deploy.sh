@@ -64,7 +64,7 @@ parse_args() {
           log_error "参数 -m | --mode 需要一个值"
         fi
         case "$2" in
-          pull|build|skip)
+          pull|build)
             IMAGE_MODE="$2"
             shift 2
             ;;
