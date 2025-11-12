@@ -267,6 +267,7 @@ git_clone() {
   if [ -d "${ZERO_DIR}/code/${PROJECT_NAME}" ]; then
     log_warn "代码仓库 ${PROJECT_NAME} 已存在，尝试更新代码..."
     cd "${ZERO_DIR}/code/${PROJECT_NAME}" || log_error "无法切换到代码目录 ${ZERO_DIR}/code/${PROJECT_NAME} ！"
+    git reset --hard HEAD || log_error "代码仓库重置失败，请检查代码仓库状态！"
     git pull origin master || log_error "代码仓库更新失败，请检查网络或仓库状态！"
     log_info "代码仓库更新成功！"
   else
