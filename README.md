@@ -19,7 +19,7 @@ Zero-Tiny（零度极简版）：基于 Java 25+ 和 Spring Boot 4.x 的 Web 管
 ### 一键安装
 
 ```shell
-curl -fsSL https://gitee.com/ice-run/zero-tiny/raw/master/install.sh | sudo bash
+curl -fsSLO https://gitee.com/ice-run/zero-tiny/raw/master/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 ### 一键部署

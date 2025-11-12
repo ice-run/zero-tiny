@@ -6,11 +6,11 @@ BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
-GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
+# GRAY='\033[0;90m'
 
 # 日志函数
-log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${GRAY} $1"; }
+log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} $1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
@@ -208,7 +208,7 @@ check_docker() {
     参考 Docker 官方文档： https://docs.docker.com/engine/install/
     如果出现网络错误，可以尝试多次重试，或者手动安装 Docker。"
     # 交互式安装 Docker
-    read -r -p "是否要安装 Docker？(Y/N，默认Y): " install_docker
+    read -r -p "是否要安装 Docker？ [Y/n] (直接回车默认为 Y): " install_docker
     if [[ -z "$install_docker" || "$install_docker" =~ ^[Yy]$ ]]; then
       log_info "开始安装 Docker..."
       if command -v curl > /dev/null 2>&1; then
@@ -233,8 +233,6 @@ check_docker() {
   else
     log_debug "Docker Swarm 已激活"
   fi
-
-  log_debug "Docker 环境检查通过"
 }
 
 # 提取 ${ENV_FILE} 文件中的变量
@@ -276,10 +274,10 @@ parse_env() {
   fi
 
   # 输出使用的变量值
-  log_info "变量值: ZERO_DIR=$ZERO_DIR"
+  log_info "部署目录: ZERO_DIR=${ZERO_DIR}"
 
   # 询问用户是否使用这些变量
-  read -r -p "是否使用这些变量？(Y/N，默认Y): " use_vars
+  read -r -p "是否使用这些变量？ [Y/n] (直接回车默认为 Y): " use_vars
   if [[ -z "$use_vars" || "$use_vars" =~ ^[Yy]$ ]]; then
     log_info "使用变量: ZERO_DIR=${ZERO_DIR}"
   else
@@ -302,7 +300,7 @@ set_password() {
   # 设置 MySQL 密码
   if [ -z "$MYSQL_PASSWORD" ]; then
     log_info "随机生成 MySQL 密码，或者手动输入密码..."
-    read -r -p "是否随机生成 MySQL 密码？(Y/N，默认Y): " generate_password
+    read -r -p "是否随机生成 MySQL 密码？ [Y/n] (直接回车默认为 Y): " generate_password
     if [[ -z "$generate_password" || "$generate_password" =~ ^[Yy]$ ]]; then
       MYSQL_PASSWORD=$(tr -dc '0-9A-Za-z_-' < /dev/urandom | head -c 8; echo)
       log_info "随机生成 MySQL 密码: ${MYSQL_PASSWORD}"
@@ -338,7 +336,7 @@ set_password() {
   # 设置 Redis 密码
   if [ -z "$REDIS_PASSWORD" ]; then
     log_info "随机生成 Redis 密码，或者手动输入密码..."
-    read -r -p "是否随机生成 Redis 密码？(Y/N，默认Y): " generate_password
+    read -r -p "是否随机生成 Redis 密码？ [Y/n] (直接回车默认为 Y): " generate_password
     if [[ -z "$generate_password" || "$generate_password" =~ ^[Yy]$ ]]; then
       REDIS_PASSWORD=$(tr -dc '0-9A-Za-z_-' < /dev/urandom | head -c 8; echo)
       log_info "随机生成 Redis 密码: ${REDIS_PASSWORD}"
@@ -522,7 +520,7 @@ create_nfs() {
   fi
 
   # 确保导出目录存在
-  [ -d "$ZERO_DIR" ] || { mkdir -p "$ZERO_DIR" || log_error "创建目录 ${ZERO_DIR} 失败"; chmod 755 "$ZERO_DIR" || true; }
+  [ -d "${ZERO_DIR}" ] || { mkdir -p "${ZERO_DIR}" || log_error "创建目录 ${ZERO_DIR} 失败"; chmod 755 "${ZERO_DIR}" || true; }
 
   # 配置 /etc/exports（幂等）
   exports_file="/etc/exports"
@@ -531,7 +529,7 @@ create_nfs() {
   [ -f "$exports_file" ] && cp "$exports_file" "${exports_file}.bak.${backup_ts}" 2>/dev/null || true
 
   # 转义路径用于正则
-  esc_dir=$(printf '%s' "$ZERO_DIR" | sed -e 's/[].[^$\\*/]/\\&/g')
+  esc_dir=$(printf '%s' "${ZERO_DIR}" | sed -e 's/[].[^$\\*/]/\\&/g')
   existing=$(grep -E "^[[:space:]]*${esc_dir}\b" "$exports_file" 2>/dev/null || true)
   new_line="${ZERO_DIR} ${HOST_IP}(${opts}) 127.0.0.1(${opts}) ::1(${opts})"
 
@@ -577,11 +575,10 @@ create_network() {
 prepare_image() {
   # 询问用户选择镜像模式
   log_info "请输入选项数字以选择获取镜像的方式（直接回车默认选择 pull 拉取仓库镜像）:"
-  log_warn "如果当前是无网环境，请选择 skip 跳过构建镜像，同时，请准备好了离线的 docker 镜像，并且调整好各个服务的 ${COMPOSE_FILE} 配置文件中的镜像名称"
   while true; do
     echo "1) pull 拉取仓库镜像"
     echo "2) build 本地构建镜像"
-    read -r -p "请选择选项 (直接回车默认为1): " choice
+    read -r -p "请选择选项 [1/2] (直接回车默认为 1): " choice
 
     if [[ -z "$choice" || "$choice" == "1" ]]; then
       IMAGE_MODE="pull"

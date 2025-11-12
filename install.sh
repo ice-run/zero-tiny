@@ -6,11 +6,11 @@ BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
-GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
+# GRAY='\033[0;90m'
 
 # 日志函数
-log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${GRAY} $1"; }
+log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} $1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
@@ -50,7 +50,7 @@ parse_args() {
           log_error "参数 -d | --dir 需要一个值"
         fi
         ZERO_DIR="$2"
-        log_debug "设置安装目录为: $ZERO_DIR"
+        log_debug "设置安装目录为: ${ZERO_DIR}"
         shift 2
         ;;
       *)
@@ -94,6 +94,7 @@ check_os() {
   log_info "操作系统：${OS} ${VERSION}"
 
   # 选择包管理器
+  log_debug "检查包管理器..."
   local pm=""
   case ",$id_lc,$id_like_lc," in
     *,debian,*|*,ubuntu,*|*,linuxmint,*|*,kali,*|*,raspbian,*|*,deepin,*|*,uos,*)
@@ -134,7 +135,7 @@ check_os() {
   fi
 
   PACKAGE_MANAGER="$pm"
-  log_info "使用包管理器：${PACKAGE_MANAGER}"
+  log_info "包管理器：${PACKAGE_MANAGER}"
 }
 
 # 判断包是否已安装
@@ -192,7 +193,7 @@ install_pkg() {
 
 # 检查 curl
 check_curl() {
-  log_info "检查 curl..."
+  log_debug "检查 curl..."
   if ! command -v curl >/dev/null 2>&1; then
     log_info "curl 未安装，开始安装..."
     if ! install_pkg curl; then
@@ -205,7 +206,7 @@ check_curl() {
 
 # 检查 git
 check_git() {
-  log_info "检查 git..."
+  log_debug "检查 git..."
   if ! command -v git >/dev/null 2>&1; then
     log_info "git 未安装，开始安装..."
     if ! install_pkg git; then
@@ -218,10 +219,10 @@ check_git() {
 
 # 创建工程目录
 create_dir() {
-  log_info "确认安装目录..."
-  read -r -p "是否确认安装到目录 ${ZERO_DIR} ？ [Y/n] : " confirm
+  log_debug "确认安装目录..."
+  read -r -p "是否确认安装到目录 ${ZERO_DIR} ？ [Y/n] (直接回车默认为 Y): " confirm
   if [[ -z "$confirm" || "$confirm" =~ ^[Yy]$ ]]; then
-    log_info "确认安装到目录 ${ZERO_DIR}"
+    log_info "用户输入了 ${confirm} 确认安装到目录 ${ZERO_DIR}"
   else
     # 循环请求用户输入，直到满足要求
     while true; do
