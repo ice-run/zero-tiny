@@ -498,9 +498,11 @@ create_nfs() {
         log_debug "NFS 服务 ${found_svc} 已在运行"
       else
         log_info "启动 NFS 服务 ${found_svc} ..."
-        systemctl enable --now "$found_svc" >/dev/null 2>&1 \
-          && log_info "NFS 服务 ${found_svc} 启动成功" \
-          || log_warn "NFS 服务 ${found_svc} 启动失败，请稍后检查"
+        if systemctl enable --now "$found_svc" >/dev/null 2>&1; then
+          log_info "NFS 服务 ${found_svc} 启动成功"
+        else
+          log_warn "NFS 服务 ${found_svc} 启动失败，请稍后检查"
+        fi
       fi
     else
       log_warn "未发现已知的 NFS 服务单元（nfs-server/nfs-kernel-server/nfs），继续处理导出"
@@ -526,7 +528,9 @@ create_nfs() {
   exports_file="/etc/exports"
   opts="rw,sync,no_subtree_check,no_root_squash"
   backup_ts=$(date +%s)
-  [ -f "$exports_file" ] && cp "$exports_file" "${exports_file}.bak.${backup_ts}" 2>/dev/null || true
+  if [ -f "$exports_file" ]; then
+    cp "$exports_file" "${exports_file}.bak.${backup_ts}" 2>/dev/null || true
+  fi
 
   # 转义路径用于正则
   esc_dir=$(printf '%s' "${ZERO_DIR}" | sed -e 's/[].[^$\\*/]/\\&/g')
