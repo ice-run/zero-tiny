@@ -4,13 +4,13 @@ set -e
 # 定义颜色以提高可读性
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
-RED='\033[0;31m'
 YELLOW='\033[0;33m'
+RED='\033[0;31m'
 GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
 
 # 日志函数
-log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} ${GRAY}$1"; }
+log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${GRAY} $1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
@@ -20,6 +20,8 @@ COMPOSE_FILE="compose.yaml"
 ENV_FILE=".env"
 PASSWORD_FILE="password.txt"
 IMAGE_MODE="pull"
+
+PROJECT_NAME="zero-tiny"
 
 ZERO_DOCKER_REGISTRY=""
 ZERO_REGISTRY_NAMESPACE=""
@@ -37,12 +39,12 @@ ZERO_NFS_HOST="${HOST_IP}"
 
 # 显示帮助信息
 show_help() {
-  echo -e "${BLUE}Docker 部署脚本${NC}"
+  echo -e "${BLUE}部署 ${PROJECT_NAME} ...${NC}"
   echo "用法: $(basename "$0") [选项]"
   echo ""
   echo "选项:"
   echo "  -h, --help                    # 显示帮助信息"
-  echo "  -m, --mode [pull|build]  # 镜像模式：pull 拉取仓库镜像，build 本地构建镜像 (默认: pull)"
+  echo "  -m, --mode [pull|build]       # 镜像模式：pull 拉取仓库镜像；build 本地构建镜像 (默认: pull)"
   echo ""
   echo "示例:"
   echo "  $(basename "$0")              # 一键部署所有服务"
@@ -78,27 +80,25 @@ parse_args() {
         ;;
     esac
   done
-
 }
 
 # 检查 root 权限
 check_root() {
   # 检查是否为 root 用户（安装软件通常需要 root 权限）
   if [ "$(id -u)" -ne 0 ]; then
-    log_error "请以 root 用户或使用 sudo 权限运行此脚本！（sudo $(basename "$0")）"
+    log_error "请以 root 用户或使用 sudo 权限运行此脚本！（sudo bash $(basename "$0")）"
   fi
 }
 
 # 检查操作系统
 check_os() {
-  log_info "检查操作系统..."
+  log_debug "检查操作系统..."
   local uname_s
   uname_s="$(uname -s 2>/dev/null || true)"
   if [ "$uname_s" != "Linux" ]; then
     log_error "此脚本仅支持 Linux 操作系统。"
   fi
 
-  log_info "检查操作系统版本..."
   if [ -r /etc/os-release ]; then
     . /etc/os-release
   else
@@ -113,7 +113,7 @@ check_os() {
 
   OS="${NAME:-$id_lc}"
   VERSION="$ver"
-  log_info "检测到操作系统：${OS} ${VERSION}"
+  log_info "操作系统：${OS} ${VERSION}"
 
   # 选择包管理器
   local pm=""
@@ -157,6 +157,45 @@ check_os() {
 
   PACKAGE_MANAGER="$pm"
   log_info "使用包管理器：${PACKAGE_MANAGER}"
+}
+
+# 检查 curl
+check_curl() {
+  log_info "检查 curl..."
+  if ! check_pkg curl; then
+    log_info "curl 未安装，开始安装..."
+    if ! install_pkg curl; then
+      log_error "curl 安装失败，请检查系统配置！"
+    fi
+  else
+    log_info "curl 已安装，版本：$(curl --version | head -n 1)"
+  fi
+}
+
+# 检查 git
+check_git() {
+  log_info "检查 git..."
+  if ! command -v git >/dev/null 2>&1; then
+    log_info "git 未安装，开始安装..."
+    if ! install_pkg git; then
+      log_error "git 安装失败，请检查系统配置！"
+    fi
+  else
+    log_info "git 已安装，版本：$(git --version)"
+  fi
+}
+
+# 检查 tar
+check_tar() {
+  log_info "检查 tar..."
+  if ! check_pkg tar; then
+    log_info "tar 未安装，开始安装..."
+    if ! install_pkg tar; then
+      log_error "tar 安装失败，请检查系统配置！"
+    fi
+  else
+    log_info "tar 已安装，版本：$(tar --version | head -n 1)"
+  fi
 }
 
 # 检查 Docker 是否安装
@@ -373,7 +412,7 @@ create_dir() {
 }
 
 # 判断包是否已安装
-is_pkg_installed() {
+check_pkg() {
   local pkg="$1"
   case "$PACKAGE_MANAGER" in
     apt)
@@ -440,7 +479,7 @@ create_nfs() {
   fi
 
   # 确保已安装
-  if ! is_pkg_installed "$pkg"; then
+  if ! check_pkg "$pkg"; then
     log_info "安装 ${pkg} ..."
     install_pkg "$pkg" || log_error "安装包 ${pkg} 失败，请手动检查系统包管理器或网络"
   else
@@ -662,20 +701,29 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
+  # 解析命令行参数
+  parse_args "$@"
+
   # 检查 root 权限
   check_root
 
   # 检查系统环境
   check_os
 
+  # 检查 curl
+  check_curl
+
+  # 检查 git
+  check_git
+
+  # 检查 tar
+  check_tar
+
   # 检查 Docker 环境
   check_docker
 
   # 提取环境变量
   parse_env
-
-  # 解析命令行参数
-  parse_args "$@"
 
   # 设置密码
   set_password
@@ -695,9 +743,9 @@ main() {
   # 部署
   docker_deploy
 
-  # 切换到 conf 目录
-  log_debug "切换到 ${ZERO_DIR}/conf/ 目录..."
-  cd "${ZERO_DIR}/conf/" || log_error "切换到 ${ZERO_DIR}/conf/ 目录失败"
+  # 切换到工程目录
+  log_debug "切换到 ${ZERO_DIR} 目录..."
+  cd "${ZERO_DIR}" || log_error "切换到 ${ZERO_DIR} 目录失败"
 
   log_info "部署成功！！！"
   log_info "查看容器状态： docker service ls"
@@ -708,5 +756,3 @@ main() {
 
 # 执行主函数
 main "$@"
-
-/bin/bash

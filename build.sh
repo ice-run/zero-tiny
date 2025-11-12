@@ -4,13 +4,13 @@ set -e
 # 定义颜色以提高可读性
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
-RED='\033[0;31m'
 YELLOW='\033[0;33m'
+RED='\033[0;31m'
 GRAY='\033[0;90m'
 NC='\033[0m' # 无颜色
 
 # 日志函数
-log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${NC} ${GRAY}$1"; }
+log_debug() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${BLUE}[DEBUG]${GRAY} $1"; }
 log_info() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${GREEN}[ INFO]${NC} $1"; }
 log_warn() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${YELLOW}[ WARN]${NC} $1"; }
 log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1"; exit 1; }
@@ -160,7 +160,7 @@ docker_push() {
   log_info "docker push ${APPLICATION}:${IMAGE_TAG} ..."
   # 尝试登录 Docker Registry
   log_info "尝试登录 Docker Registry：${DOCKER_REGISTRY} ..."
-  if docker login ${DOCKER_REGISTRY}; then
+  if docker login "${DOCKER_REGISTRY}"; then
     # 登录成功，执行推送
     log_info "Docker Registry 登录成功，开始推送镜像..."
     docker push "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" || log_error "docker push 失败！"
@@ -175,18 +175,18 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
-  # 解析环境变量
-  parse_env
-
   # 解析命令行参数
   parse_args "$@"
+
+  # 解析环境变量
+  parse_env
 
   # docker build
   docker_build
 
   # docker push
   # 开源版本暂不推送镜像，开发者可自行修改仓库地址和脚本
-  docker_push
+  # docker_push
 
   # 切换工程目录
   switch_code_dir

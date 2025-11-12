@@ -23,7 +23,7 @@ PACKAGE_MANAGER=""
 
 # 显示帮助信息
 show_help() {
-  echo -e "${BLUE}${PROJECT_NAME} 安装流程${NC}"
+  echo -e "${BLUE}安装 ${PROJECT_NAME} ...${NC}"
   echo "用法: $(basename "$0") [选项]"
   echo ""
   echo "选项:"
@@ -60,25 +60,23 @@ parse_args() {
   done
 }
 
-
 # 检查 root 权限
 check_root() {
   # 检查是否为 root 用户（安装软件通常需要 root 权限）
   if [ "$(id -u)" -ne 0 ]; then
-    log_error "请以 root 用户或使用 sudo 权限运行此脚本！（sudo $(basename "$0")）"
+    log_error "请以 root 用户或使用 sudo 权限运行此脚本！（sudo bash $(basename "$0")）"
   fi
 }
 
 # 检查操作系统
 check_os() {
-  log_info "检查操作系统..."
+  log_debug "检查操作系统..."
   local uname_s
   uname_s="$(uname -s 2>/dev/null || true)"
   if [ "$uname_s" != "Linux" ]; then
     log_error "此脚本仅支持 Linux 操作系统。"
   fi
 
-  log_info "检查操作系统版本..."
   if [ -r /etc/os-release ]; then
     . /etc/os-release
   else
@@ -93,7 +91,7 @@ check_os() {
 
   OS="${NAME:-$id_lc}"
   VERSION="$ver"
-  log_info "检测到操作系统：${OS} ${VERSION}"
+  log_info "操作系统：${OS} ${VERSION}"
 
   # 选择包管理器
   local pm=""
@@ -192,16 +190,29 @@ install_pkg() {
   return 0
 }
 
-# 检查 git
-check_git() {
-  log_info "检查 Git..."
-  if ! command -v git >/dev/null 2>&1; then
-    log_info "Git 未安装，开始安装..."
-    if ! install_pkg git; then
-      log_error "Git 安装失败，请检查系统配置！"
+# 检查 curl
+check_curl() {
+  log_info "检查 curl..."
+  if ! command -v curl >/dev/null 2>&1; then
+    log_info "curl 未安装，开始安装..."
+    if ! install_pkg curl; then
+      log_error "curl 安装失败，请检查系统配置！"
     fi
   else
-    log_info "Git 已安装，版本：$(git --version)"
+    log_info "curl 已安装，版本：$(curl --version | head -n 1)"
+  fi
+}
+
+# 检查 git
+check_git() {
+  log_info "检查 git..."
+  if ! command -v git >/dev/null 2>&1; then
+    log_info "git 未安装，开始安装..."
+    if ! install_pkg git; then
+      log_error "git 安装失败，请检查系统配置！"
+    fi
+  else
+    log_info "git 已安装，版本：$(git --version)"
   fi
 }
 
@@ -217,8 +228,8 @@ create_dir() {
       read -r -p "请输入安装目录: " input_dir
       if [ -z "$input_dir" ]; then
         log_warn "安装目录不能为空！请重新输入..."
-      elif ! [[ "$input_dir" =~ ^/[a-zA-Z0-9_-/]+$ ]]; then
-        log_warn "安装目录必须符合正则表达式 ^/[a-zA-Z0-9_-/]+$ ！请重新输入..."
+      elif ! [[ "$input_dir" =~ ^/[a-zA-Z0-9_/-]+$ ]]; then
+        log_warn "安装目录必须符合正则表达式 ^/[a-zA-Z0-9_/-]+$ ！请重新输入..."
       else
         ZERO_DIR="$input_dir"
         log_info "使用用户输入的 安装目录: ${ZERO_DIR}"
@@ -230,6 +241,13 @@ create_dir() {
   log_info "创建工程目录 ${ZERO_DIR} ..."
   if [ -d "${ZERO_DIR}" ]; then
     log_warn "目录 ${ZERO_DIR} 已存在，跳过创建"
+    # 检查目录权限
+    if [ ! -w "${ZERO_DIR}" ] || [ ! -x "${ZERO_DIR}" ]; then
+      log_warn "对目录 ${ZERO_DIR} 没有写入或执行权限！"
+      log_debug "尝试修改目录 ${ZERO_DIR} 的权限..."
+      chmod u+w+x "${ZERO_DIR}" || log_error "无法修改目录 ${ZERO_DIR} 的权限！请手动检查权限设置。"
+      log_info "目录 ${ZERO_DIR} 权限修改成功"
+    fi
   else
     mkdir -p "${ZERO_DIR}" || log_error "无法创建目录 ${ZERO_DIR} ！"
     log_info "目录 ${ZERO_DIR} 创建成功"
@@ -252,6 +270,7 @@ git_clone() {
     log_info "代码仓库更新成功！"
   else
     git clone https://gitee.com/ice-run/zero-tiny.git || log_error "代码仓库克隆失败，请检查网络或仓库状态！"
+    git config --global --add safe.directory "${ZERO_DIR}/code/${PROJECT_NAME}"
     log_info "代码仓库克隆成功！"
   fi
 }
@@ -259,7 +278,14 @@ git_clone() {
 # 执行部署脚本
 run_deploy() {
   log_info "开始执行部署脚本..."
-  # bash deploy.sh
+  deploy_script="${ZERO_DIR}/code/${PROJECT_NAME}/deploy.sh"
+  if [ -f "$deploy_script" ]; then
+    chmod +x "$deploy_script" || log_warn "无法设置部署脚本可执行权限，但仍尝试运行..."
+    bash "$deploy_script" || log_error "部署脚本执行失败！"
+    log_info "部署脚本执行成功！"
+  else
+    log_error "部署脚本 $deploy_script 不存在，无法继续！"
+  fi
 }
 
 # 主函数
@@ -267,17 +293,20 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
+  # 解析命令行参数
+  parse_args "$@"
+
   # 检查 root 权限
   check_root
 
   # 检查系统环境
   check_os
 
+  # 检查 curl
+  check_curl
+
   # 检查 git
   check_git
-
-  # 解析命令行参数
-  parse_args "$@"
 
   # 创建工程目录
   create_dir
@@ -288,10 +317,9 @@ main() {
   # 执行部署脚本
   run_deploy
 
+  cd "${ZERO_DIR}" || log_error "无法切换到安装目录 ${ZERO_DIR} ！"
   log_info "安装完成！"
 }
 
 # 执行主函数
 main "$@"
-
-/bin/bash
