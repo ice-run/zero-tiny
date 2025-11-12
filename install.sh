@@ -475,6 +475,7 @@ set_password() {
         fi
       done
     fi
+    echo "${MYSQL_PASSWORD}" > "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" || log_error "写入 MySQL 密码到 ${PASSWORD_FILE} 文件失败！"
   else
     log_info "检测到已存在的 MySQL 密码: ${MYSQL_PASSWORD}"
   fi
@@ -509,6 +510,7 @@ set_password() {
         fi
       done
     fi
+    echo "${REDIS_PASSWORD}" > "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" || log_error "写入 Redis 密码到 ${PASSWORD_FILE} 文件失败！"
   else
     log_info "检测到已存在的 Redis 密码: ${REDIS_PASSWORD}"
   fi
