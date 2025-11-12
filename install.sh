@@ -233,7 +233,7 @@ create_dir() {
         log_warn "安装目录必须符合正则表达式 ^/[a-zA-Z0-9_/-]+$ ！请重新输入..."
       else
         ZERO_DIR="$input_dir"
-        log_info "使用用户输入的 安装目录: ${ZERO_DIR}"
+        log_info "使用用户输入的安装目录: ${ZERO_DIR}"
         break
       fi
     done
@@ -278,11 +278,12 @@ git_clone() {
 
 # 执行部署脚本
 run_deploy() {
-  log_info "开始执行部署脚本..."
+  log_info "准备执行部署脚本..."
   deploy_script="${ZERO_DIR}/code/${PROJECT_NAME}/deploy.sh"
   if [ -f "$deploy_script" ]; then
     chmod +x "$deploy_script" || log_warn "无法设置部署脚本可执行权限，但仍尝试运行..."
-    bash "$deploy_script" || log_error "部署脚本执行失败！"
+    log_info "正在执行部署脚本 bash $deploy_script ..."
+    bash "$deploy_script" || log_error "部署脚本执行失败！可以重试部署命令: bash $deploy_script"
     log_info "部署脚本执行成功！"
   else
     log_error "部署脚本 $deploy_script 不存在，无法继续！"

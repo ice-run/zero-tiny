@@ -17,10 +17,11 @@ log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1";
 
 # 默认配置变量
 ENV_FILE=".env"
-DOCKER_REGISTRY=""
-REGISTRY_NAMESPACE=""
-APPLICATION=""
-IMAGE_TAG="tiny-latest"
+
+ZERO_DOCKER_REGISTRY=""
+ZERO_REGISTRY_NAMESPACE=""
+ZERO_APPLICATION=""
+ZERO_IMAGE_TAG="tiny-latest"
 
 # 显示帮助信息
 show_help() {
@@ -53,27 +54,27 @@ parse_args() {
   fi
 
   # 设置应用名称（第一个位置参数）
-  APPLICATION="$1"
+  ZERO_APPLICATION="$1"
   # 设置镜像标签（第二个位置参数）
   if [ $# -eq 1 ]; then
-    IMAGE_TAG="tiny-latest"
+    ZERO_IMAGE_TAG="tiny-latest"
   else
     # 如果镜像标签以 tiny- 开头，直接使用
     if [[ "$2" == tiny-* ]]; then
-      IMAGE_TAG="$2"
+      ZERO_IMAGE_TAG="$2"
     else
       # 如果镜像标签不以 tiny- 开头，添加 tiny- 前缀
-      IMAGE_TAG="tiny-$2"
+      ZERO_IMAGE_TAG="tiny-$2"
     fi
   fi
 
   # 验证应用名称不为空
-  if [ -z "${APPLICATION}" ]; then
+  if [ -z "${ZERO_APPLICATION}" ]; then
     log_error "应用名称不能为空"
   fi
 
   # 验证镜像标签不为空
-  if [ -z "${IMAGE_TAG}" ]; then
+  if [ -z "${ZERO_IMAGE_TAG}" ]; then
     log_error "镜像标签不能为空"
   fi
 }
@@ -125,17 +126,17 @@ switch_code_dir() {
 
 # 切换应用目录
 switch_app_dir() {
-  # 根据 APPLICATION 切换应用目录
+  # 根据 ZERO_APPLICATION 切换应用目录
   local module_dir
-  case "${APPLICATION}" in
+  case "${ZERO_APPLICATION}" in
     "zero-admin")
-      module_dir="zero-admin"
+      module_dir="admin"
       ;;
     "zero-server")
-      module_dir="zero-server"
+      module_dir="server"
       ;;
     *)
-      log_error "无效的应用名称 ${APPLICATION}！"
+      log_error "无效的应用名称 ${ZERO_APPLICATION}！"
       ;;
   esac
 
@@ -151,19 +152,19 @@ switch_app_dir() {
 docker_build() {
   switch_app_dir
 
-  log_info "docker build ${APPLICATION}:${IMAGE_TAG} ..."
-  docker build -f Dockerfile -t "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" . || log_error "docker build 失败！"
+  log_info "docker build ${ZERO_APPLICATION}:${ZERO_IMAGE_TAG} ..."
+  docker build -f Dockerfile -t "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG}" . || log_error "docker build 失败！"
 }
 
 # docker push
 docker_push() {
-  log_info "docker push ${APPLICATION}:${IMAGE_TAG} ..."
+  log_info "docker push ${ZERO_APPLICATION}:${ZERO_IMAGE_TAG} ..."
   # 尝试登录 Docker Registry
-  log_info "尝试登录 Docker Registry：${DOCKER_REGISTRY} ..."
-  if docker login "${DOCKER_REGISTRY}"; then
+  log_info "尝试登录 Docker Registry：${ZERO_DOCKER_REGISTRY} ..."
+  if docker login "${ZERO_DOCKER_REGISTRY}"; then
     # 登录成功，执行推送
     log_info "Docker Registry 登录成功，开始推送镜像..."
-    docker push "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG}" || log_error "docker push 失败！"
+    docker push "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG}" || log_error "docker push 失败！"
   else
     # 登录失败，输出警告但不中断执行
     log_warn "Docker Registry 登录失败，跳过镜像推送步骤！"
@@ -191,7 +192,7 @@ main() {
   # 切换工程目录
   switch_code_dir
 
-  log_info "${DOCKER_REGISTRY}/${REGISTRY_NAMESPACE}/${APPLICATION}:${IMAGE_TAG} 构建成功！"
+  log_info "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG} 构建成功！"
 }
 
 # 执行主函数

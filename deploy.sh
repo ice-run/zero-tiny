@@ -212,9 +212,9 @@ check_docker() {
     if [[ -z "$install_docker" || "$install_docker" =~ ^[Yy]$ ]]; then
       log_info "开始安装 Docker..."
       if command -v curl > /dev/null 2>&1; then
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-        rm get-docker.sh
+        curl -fsSL https://get.docker.com -o get-docker.sh || log_error "下载 Docker 安装脚本失败！请检查网络连接。可以尝试多次重试"
+        sh get-docker.sh || log_error "Docker 安装脚本执行失败！请检查网络连接。可以尝试多次重试"
+        rm get-docker.sh || log_error "删除 Docker 安装脚本失败！请检查权限。"
       else
         log_error "未找到 curl 命令，无法自动安装 Docker。请手动安装 Docker。
         参考 Docker 官方文档： https://docs.docker.com/engine/install/"
@@ -281,7 +281,7 @@ parse_env() {
   if [[ -z "$use_vars" || "$use_vars" =~ ^[Yy]$ ]]; then
     log_info "使用变量: ZERO_DIR=${ZERO_DIR}"
   else
-    log_error "用户选择不使用变量，部署终止。请调整 ${env_file} 文件中的变量后重试。"
+    log_error "用户选择不使用变量，部署终止。请调整 ${WORK_DIR}/docker/${env_file} 文件中的变量后重试。"
   fi
 
 }
