@@ -438,7 +438,7 @@ git_clone() {
 # 复制配置文件
 copy_config() {
   log_info "复制 ${ZERO_DIR}/code/${PROJECT}/docker 目录中的所有文件到 ${ZERO_DIR}/conf ..."
-  cp -R "${ZERO_DIR}/code/${PROJECT}/docker/"* "${ZERO_DIR}/conf/" || log_error "复制 docker 目录文件失败！"
+  cp -a "${ZERO_DIR}/code/${PROJECT}/docker/." "${ZERO_DIR}/conf/" || log_error "复制 docker 目录文件失败！"
   log_debug "配置文件复制成功！！！"
   log_debug "替换 ${ENV_FILE} 文件中的变量..."
   sed -i "s|ZERO_DIR=.*|ZERO_DIR=${ZERO_DIR}|g" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 ZERO_DIR 变量失败！"
