@@ -23,6 +23,7 @@ IMAGE_MODE="pull"
 
 PROJECT="zero-tiny"
 ZERO_DIR="/zero"
+ZERO_IMAGE_TAG="tiny-latest"
 
 # 包管理器
 PACKAGE_MANAGER=""
