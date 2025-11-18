@@ -455,6 +455,9 @@ copy_config() {
 # 设置密码函数
 set_password() {
   # 优先从 ${ZERO_DIR}/conf/mysql/${PASSWORD_FILE} 读取已存在的 MYSQL_PASSWORD
+  if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
+    MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
+  fi
   if [ -z "$MYSQL_PASSWORD" ]; then
     if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
       MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
@@ -490,6 +493,9 @@ set_password() {
 
 
   # 优先从 ${ZERO_DIR}/conf/redis/${PASSWORD_FILE} 读取已存在的 REDIS_PASSWORD
+  if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
+    REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
+  fi
   if [ -z "$REDIS_PASSWORD" ]; then
     if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
       REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
