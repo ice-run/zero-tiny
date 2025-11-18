@@ -482,6 +482,12 @@ set_password() {
         fi
       done
     fi
+    # 如果密码文件不存在，则创建
+    if [ ! -e "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
+      mkdir -p "${ZERO_DIR}/conf/mysql/" || log_error "创建 ${ZERO_DIR}/conf/mysql/ 目录失败！"
+      chmod 755 "${ZERO_DIR}/conf/mysql/" || log_warn "设置 ${ZERO_DIR}/conf/mysql/ 目录权限失败！"
+      log_debug "${ZERO_DIR}/conf/mysql/ 目录创建成功"
+    fi
     echo "${MYSQL_PASSWORD}" > "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" || log_error "写入 MySQL 密码到 ${PASSWORD_FILE} 文件失败！"
   else
     log_info "检测到已存在的 MySQL 密码: ${MYSQL_PASSWORD}"
@@ -515,6 +521,12 @@ set_password() {
           break
         fi
       done
+    fi
+    # 如果密码文件不存在，则创建
+    if [ ! -e "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
+      mkdir -p "${ZERO_DIR}/conf/redis/" || log_error "创建 ${ZERO_DIR}/conf/redis/ 目录失败！"
+      chmod 755 "${ZERO_DIR}/conf/redis/" || log_warn "设置 ${ZERO_DIR}/conf/redis/ 目录权限失败！"
+      log_debug "${ZERO_DIR}/conf/redis/ 目录创建成功"
     fi
     echo "${REDIS_PASSWORD}" > "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" || log_error "写入 Redis 密码到 ${PASSWORD_FILE} 文件失败！"
   else
