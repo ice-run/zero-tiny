@@ -722,35 +722,28 @@ docker_deploy() {
 }
 
 # 检查容器健康状态
-service_health_check() {
-  local retries=18
-  local seconds=10
-  local count=0
-  local health=false
+check_stack_health() {
+  local retries=30
+  local delay=10
 
-  local service="$1";
-  log_info "准备检查服务健康状态 ${service} ..."
+  log_info "开始检查 Stack ${ZERO_NAMESPACE} 的健康状态..."
 
-  while [ ${count} -lt ${retries} ]; do
-    for container in $(docker ps -q --filter "name=${service}"); do
-      local status
-      status=$(docker inspect --format '{{.State.Health.Status}}' "${container}")
-      if [ "${status}" == "healthy" ]; then
-        health=true
-      else
-        health=false
-      fi
-    done
-    if [ "${health}" == "true" ]; then
-      log_info "服务 ${service} 健康检查成功！"
+  for ((i=1; i<=retries; i++)); do
+    # 检查所有服务是否都有运行中的任务
+    local unhealthy_services
+    unhealthy_services=$(docker service ls -f name="${ZERO_NAMESPACE}" --format "{{.Name}} {{.Replicas}}" | grep -v "N/A" | grep -v "/")
+
+    if [[ -z "$unhealthy_services" ]]; then
+      log_success "Stack ${ZERO_NAMESPACE} 中所有服务都已健康运行！"
       return 0
     fi
-    log_warn "服务 ${service} 健康检查失败，等待 ${seconds} 秒后重试..."
-    sleep ${seconds}
-    count=$((count + 1))
+
+    log_debug "第 $i/$retries 次检查: 仍有服务在启动中..."
+    sleep $delay
   done
 
-  log_error "服务 ${service} 健康检查失败，超出最大重试次数"
+  docker service ls -f name="${ZERO_NAMESPACE}"
+  log_error "Stack ${ZERO_NAMESPACE} 部署超时，部分服务未正常启动！"
 }
 
 # 主函数
@@ -802,6 +795,9 @@ main() {
 
   # 部署
   docker_deploy
+
+  # 检查 Stack 健康状态
+  check_stack_health
 
   # 切换到工程目录
   log_debug "切换到 ${ZERO_DIR} 目录..."

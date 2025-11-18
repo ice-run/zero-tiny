@@ -72,6 +72,10 @@ services:
         delay: 10s
         order: start-first
         failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     volumes:
       - logs-server:/logs
     configs:
@@ -97,6 +101,10 @@ services:
       - zero
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 60s
 
   admin:
     image: ${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/zero-admin:${ZERO_IMAGE_TAG}
@@ -123,6 +131,10 @@ services:
       - zero
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 60s
 
 secrets:
   mysql-password:

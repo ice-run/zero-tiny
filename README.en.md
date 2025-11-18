@@ -22,14 +22,6 @@ Docker container technology solution is supported.
 curl -fsSLO https://gitee.com/ice-run/zero-tiny/raw/master/install.sh && chmod +x install.sh && ./install.sh
 ```
 
-### One-Click Deployment
-
-One-click deployment is supported
-
-```shell
-./deploy.sh
-```
-
 ### Manual Build
 
 ```shell
@@ -39,7 +31,7 @@ One-click deployment is supported
 ### Update Deployment
 
 ```shell
-./update.sh
+./deploy.sh
 ```
 
 ## Instructions
