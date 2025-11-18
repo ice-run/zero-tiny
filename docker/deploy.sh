@@ -182,20 +182,22 @@ check_stack_health() {
   log_info "开始检查 Stack ${ZERO_NAMESPACE} 的健康状态..."
 
   for ((i=1; i<=retries; i++)); do
-    # 检查所有服务是否都有运行中的任务
-    local unhealthy_services
-    unhealthy_services=$(docker service ls -f name="${ZERO_NAMESPACE}" --format "{{.Name}} {{.Replicas}}" | grep -v "N/A" | grep -v "/")
+    # 统计未就绪服务数量（避免在空输出来触发 set -e）
+    local unhealthy
+    unhealthy=$(
+      docker stack services "${ZERO_NAMESPACE}" --format '{{.Replicas}}' | awk -F/ '($1=="N/A")||($2=="")||($1!=$2){u++} END{print u+0}'
+    )
 
-    if [[ -z "$unhealthy_services" ]]; then
-      log_success "Stack ${ZERO_NAMESPACE} 中所有服务都已健康运行！"
+    if [[ "${unhealthy}" -eq 0 ]]; then
+      log_info "Stack ${ZERO_NAMESPACE} 中所有服务都已健康运行！"
       return 0
     fi
 
-    log_debug "第 $i/$retries 次检查: 仍有服务在启动中..."
-    sleep $delay
+    log_debug "第 ${i}/${retries} 次检查：仍有 ${unhealthy} 个服务未就绪..."
+    sleep "${delay}"
   done
 
-  docker service ls -f name="${ZERO_NAMESPACE}"
+  docker stack services "${ZERO_NAMESPACE}"
   log_error "Stack ${ZERO_NAMESPACE} 部署超时，部分服务未正常启动！"
 }
 
