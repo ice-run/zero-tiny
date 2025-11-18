@@ -119,12 +119,6 @@ parse_env() {
   log_info "变量值: ZERO_DIR=${ZERO_DIR}"
 }
 
-# 切换工程目录
-switch_code_dir() {
-  log_debug "切换到工程目录 ${ZERO_DIR} ..."
-  cd "${ZERO_DIR}" || log_error "无法切换到工程目录 ${ZERO_DIR} ！"
-}
-
 # docker build
 docker_build() {
   local module_dir
@@ -166,11 +160,11 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
-  # 解析命令行参数
-  parse_args "$@"
-
   # 解析环境变量
   parse_env
+
+  # 解析命令行参数
+  parse_args "$@"
 
   # docker build
   docker_build

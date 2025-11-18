@@ -741,10 +741,10 @@ docker_deploy() {
 
 # 检查容器健康状态
 check_stack_health() {
-  local retries=30
+  local retries=60
   local delay=10
 
-  log_info "开始检查 Stack ${ZERO_NAMESPACE} 的健康状态..."
+  log_info "开始检查 Docker Stack ${ZERO_NAMESPACE} 的健康状态..."
   local all
   all=$(docker stack services "${ZERO_NAMESPACE}"  --format '{{.Name}}' | wc -l | xargs)
 
@@ -756,7 +756,7 @@ check_stack_health() {
     )
 
     if [[ "${unhealthy}" -eq 0 ]]; then
-      log_info "Stack ${ZERO_NAMESPACE} 中所有服务都已健康运行！"
+      log_info "Docker Stack ${ZERO_NAMESPACE} 中所有服务都已健康运行！"
       return 0
     fi
 
@@ -765,7 +765,7 @@ check_stack_health() {
   done
 
   docker stack services "${ZERO_NAMESPACE}"
-  log_error "Stack ${ZERO_NAMESPACE} 部署超时，部分服务未正常启动！"
+  log_error "Docker Stack ${ZERO_NAMESPACE} 部署超时，部分服务未正常启动！"
 }
 
 # 主函数
@@ -818,14 +818,10 @@ main() {
   # 部署
   docker_deploy
 
-  # 检查 Stack 健康状态
+  # 检查 stack 健康状态
   check_stack_health
 
-  # 切换到工程目录
-  log_debug "切换到 ${ZERO_DIR} 目录..."
-  cd "${ZERO_DIR}" || log_error "切换到 ${ZERO_DIR} 目录失败"
-
-  log_info "部署成功！！！"
+  log_info "部署成功！！！可以进入 ${ZERO_DIR} 目录查看相关文件..."
   log_info "查看容器状态： docker service ls"
   log_info "尝试访问网站： http://${HOST_IP}:80"
   log_info "安装完成！！！"

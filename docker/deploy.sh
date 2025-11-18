@@ -208,11 +208,11 @@ main() {
   # 确保我们在正确的目录中（脚本所在目录）
   cd "$(dirname "$0")" || log_error "无法切换到脚本目录"
 
-  # 解析命令行参数
-  parse_args "$@"
-
   # 解析环境变量
   parse_env
+
+  # 解析命令行参数
+  parse_args "$@"
 
   # 准备镜像
   if [ "${MODE}" = "UPDATE" ]; then
@@ -233,10 +233,6 @@ main() {
 
   # 检查 Stack 健康状态
   check_stack_health
-
-  # 切换到工程目录
-  log_debug "切换到 ${ZERO_DIR} 目录..."
-  cd "${ZERO_DIR}" || log_error "切换到 ${ZERO_DIR} 目录失败"
 
   if [ "${MODE}" = "RESTART" ]; then
     log_info "${ZERO_APPLICATION} 重启成功！"
