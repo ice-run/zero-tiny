@@ -133,9 +133,10 @@ prepare_image() {
     git_pull
 
     # 构建镜像
-    local build_script="${ZERO_DIR}/build.sh"
-    chmod +x "${build_script}" || log_warn "设置 build.sh 文件权限失败！"
-    "${build_script}" "${ZERO_APPLICATION}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
+    local build_script="build.sh"
+    chmod +x "${ZERO_DIR}/${build_script}" || log_warn "设置 ${build_script} 文件权限失败！"
+    cd "${ZERO_DIR}"
+    "./${build_script}" "${ZERO_APPLICATION}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
   fi
 }
 

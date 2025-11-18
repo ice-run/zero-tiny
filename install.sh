@@ -714,9 +714,10 @@ pull_image() {
 # 构建镜像函数
 build_image() {
   local image_name="$1";
-  local build_script="${ZERO_DIR}/build.sh"
-  chmod +x "${build_script}" || log_warn "设置 build.sh 文件权限失败！"
-  "${build_script}" "${image_name}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
+  local build_script="build.sh"
+  chmod +x "${ZERO_DIR}/${build_script}" || log_warn "设置 ${build_script} 文件权限失败！"
+  cd "${ZERO_DIR}"
+  "./${build_script}" "${image_name}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
 }
 
 # Docker 部署
