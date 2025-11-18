@@ -296,7 +296,7 @@ check_docker() {
 # 提取 ${ENV_FILE} 文件中的变量
 parse_env() {
   # 检查是否存在 ${ENV_FILE} 文件
-  local env_file="${ZERO_DIR}/code/${PROJECT}/docker/$ENV_FILE"
+  local env_file="${ZERO_DIR}/conf/${ENV_FILE}"
 
   # 如果 ${ENV_FILE} 文件存在，则读取变量
   if [ -f "$env_file" ]; then
@@ -458,8 +458,6 @@ set_password() {
   # 安全读取（存在且可读，避免 set -e 因权限问题中断）
   if [ -r "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
     MYSQL_PASSWORD="$(<"${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")"
-  else
-    log_debug "未找到或无法读取 MySQL 密码文件，稍后将生成新密码"
   fi
 
   # 设置 MySQL 密码
@@ -494,8 +492,6 @@ set_password() {
   # 安全读取（存在且可读，避免 set -e 因权限问题中断）
   if [ -r "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
     REDIS_PASSWORD="$(<"${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")"
-  else
-    log_debug "未找到或无法读取 Redis 密码文件，稍后将生成新密码"
   fi
 
   # 设置 Redis 密码
