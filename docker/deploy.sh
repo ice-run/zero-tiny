@@ -180,6 +180,8 @@ check_stack_health() {
   local delay=10
 
   log_info "开始检查 Stack ${ZERO_NAMESPACE} 的健康状态..."
+  local all
+  all=$(docker stack services "${ZERO_NAMESPACE}"  --format '{{.Name}}' | wc -l | xargs)
 
   for ((i=1; i<=retries; i++)); do
     # 统计未就绪服务数量（避免在空输出来触发 set -e）
@@ -193,7 +195,7 @@ check_stack_health() {
       return 0
     fi
 
-    log_debug "第 ${i}/${retries} 次检查：仍有 ${unhealthy} 个服务未就绪..."
+    log_debug "第 ${i}/${retries} 次检查：仍有 ${unhealthy}/${all} 个服务未就绪..."
     sleep "${delay}"
   done
 

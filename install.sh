@@ -458,11 +458,6 @@ set_password() {
   if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
     MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
   fi
-  if [ -z "$MYSQL_PASSWORD" ]; then
-    if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
-      MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
-    fi
-  fi
 
   # 设置 MySQL 密码
   if [ -z "$MYSQL_PASSWORD" ]; then
@@ -495,11 +490,6 @@ set_password() {
   # 优先从 ${ZERO_DIR}/conf/redis/${PASSWORD_FILE} 读取已存在的 REDIS_PASSWORD
   if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
     REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
-  fi
-  if [ -z "$REDIS_PASSWORD" ]; then
-    if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
-      REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
-    fi
   fi
 
   # 设置 Redis 密码
@@ -741,6 +731,8 @@ check_stack_health() {
   local delay=10
 
   log_info "开始检查 Stack ${ZERO_NAMESPACE} 的健康状态..."
+  local all
+  all=$(docker stack services "${ZERO_NAMESPACE}"  --format '{{.Name}}' | wc -l | xargs)
 
   for ((i=1; i<=retries; i++)); do
     # 统计未就绪服务数量（避免在空输出来触发 set -e）
@@ -754,7 +746,7 @@ check_stack_health() {
       return 0
     fi
 
-    log_debug "第 ${i}/${retries} 次检查：仍有 ${unhealthy} 个服务未就绪..."
+    log_debug "第 ${i}/${retries} 次检查：仍有 ${unhealthy}/${all} 个服务未就绪..."
     sleep "${delay}"
   done
 
