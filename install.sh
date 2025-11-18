@@ -455,8 +455,11 @@ copy_config() {
 # 设置密码函数
 set_password() {
   # 优先从 ${ZERO_DIR}/conf/mysql/${PASSWORD_FILE} 读取已存在的 MYSQL_PASSWORD
-  if [ -f "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
-    MYSQL_PASSWORD=$(cat "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")
+  # 安全读取（存在且可读，避免 set -e 因权限问题中断）
+  if [ -r "${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}" ]; then
+    MYSQL_PASSWORD="$(<"${ZERO_DIR}/conf/mysql/${PASSWORD_FILE}")"
+  else
+    log_debug "未找到或无法读取 MySQL 密码文件，稍后将生成新密码"
   fi
 
   # 设置 MySQL 密码
@@ -488,8 +491,11 @@ set_password() {
 
 
   # 优先从 ${ZERO_DIR}/conf/redis/${PASSWORD_FILE} 读取已存在的 REDIS_PASSWORD
-  if [ -f "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
-    REDIS_PASSWORD=$(cat "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")
+  # 安全读取（存在且可读，避免 set -e 因权限问题中断）
+  if [ -r "${ZERO_DIR}/conf/redis/${PASSWORD_FILE}" ]; then
+    REDIS_PASSWORD="$(<"${ZERO_DIR}/conf/redis/${PASSWORD_FILE}")"
+  else
+    log_debug "未找到或无法读取 Redis 密码文件，稍后将生成新密码"
   fi
 
   # 设置 Redis 密码
