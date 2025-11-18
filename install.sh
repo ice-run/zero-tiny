@@ -442,6 +442,14 @@ copy_config() {
   log_debug "配置文件复制成功！！！"
   log_debug "替换 ${ENV_FILE} 文件中的变量..."
   sed -i "s|ZERO_DIR=.*|ZERO_DIR=${ZERO_DIR}|g" "${ZERO_DIR}/conf/${ENV_FILE}" || log_error "替换 ZERO_DIR 变量失败！"
+
+  log_info "移动 ${ZERO_DIR}/conf/build.sh 到 ${ZERO_DIR}/ ..."
+  mv "${ZERO_DIR}/conf/build.sh" "${ZERO_DIR}/" || log_error "移动 build.sh 失败！"
+  chmod +x "${ZERO_DIR}/build.sh" || log_error "设置 build.sh 为可执行文件失败！"
+
+  log_info "移动 ${ZERO_DIR}/conf/deploy.sh 到 ${ZERO_DIR}/ ..."
+  mv "${ZERO_DIR}/conf/deploy.sh" "${ZERO_DIR}/" || log_error "移动 deploy.sh 失败！"
+  chmod +x "${ZERO_DIR}/deploy.sh" || log_error "设置 deploy.sh 为可执行文件失败！"
 }
 
 # 设置密码函数
@@ -696,7 +704,7 @@ pull_image() {
 # 构建镜像函数
 build_image() {
   local image_name="$1";
-  build_script="${ZERO_DIR}/code/${PROJECT}/build.sh"
+  local build_script="${ZERO_DIR}/build.sh"
   chmod +x "${build_script}" || log_warn "设置 build.sh 文件权限失败！"
   "${build_script}" "${image_name}" "${ZERO_IMAGE_TAG}" || log_error "镜像构建也失败了！"
 }

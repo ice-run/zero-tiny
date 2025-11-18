@@ -25,13 +25,13 @@ curl -fsSLO https://gitee.com/ice-run/zero-tiny/raw/master/install.sh && chmod +
 ### Manual Build
 
 ```shell
-./build.sh
+/zero/build.sh -h
 ```
 
 ### Update Deployment
 
 ```shell
-./deploy.sh
+/zero/deploy.sh -h
 ```
 
 ## Instructions

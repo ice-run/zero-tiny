@@ -18,6 +18,7 @@ log_error() { echo -e "${NC}$(date '+%Y-%m-%dT%H:%M:%S') ${RED}[ERROR]${NC} $1";
 # 默认配置变量
 ENV_FILE=".env"
 
+PROJECT="zero-tiny"
 ZERO_DOCKER_REGISTRY=""
 ZERO_REGISTRY_NAMESPACE=""
 ZERO_APPLICATION=""
@@ -41,7 +42,7 @@ show_help() {
 
 # 参数处理
 parse_args() {
-  CODE_DIR="$(pwd)"
+  ZERO_DIR="$(pwd)"
   # 检查是否请求帮助
   if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     show_help
@@ -82,7 +83,7 @@ parse_args() {
 # 提取 ${ENV_FILE} 文件中的变量
 parse_env() {
   # 检查是否存在 ${ENV_FILE} 文件
-  local env_file="docker/${ENV_FILE}"
+  local env_file="${ZERO_DIR}/conf/${ENV_FILE}"
 
   # 如果 ${ENV_FILE} 文件存在，则读取变量
   if [ -f "$env_file" ]; then
@@ -115,18 +116,17 @@ parse_env() {
   fi
 
   # 输出使用的变量值
-  log_info "变量值: CODE_DIR=${CODE_DIR}"
+  log_info "变量值: ZERO_DIR=${ZERO_DIR}"
 }
 
 # 切换工程目录
 switch_code_dir() {
-  log_debug "切换到工程目录 ${CODE_DIR} ..."
-  cd "${CODE_DIR}" || log_error "无法切换到工程目录 ${CODE_DIR} ！"
+  log_debug "切换到工程目录 ${ZERO_DIR} ..."
+  cd "${ZERO_DIR}" || log_error "无法切换到工程目录 ${ZERO_DIR} ！"
 }
 
-# 切换应用目录
-switch_app_dir() {
-  # 根据 ZERO_APPLICATION 切换应用目录
+# docker build
+docker_build() {
   local module_dir
   case "${ZERO_APPLICATION}" in
     "zero-admin")
@@ -140,20 +140,10 @@ switch_app_dir() {
       ;;
   esac
 
-  local app_dir="${CODE_DIR}/${module_dir}"
-  log_debug "切换到应用目录 ${app_dir} ..."
-  if [ ! -d "${app_dir}" ]; then
-    log_error "应用目录 ${app_dir} 不存在"
-  fi
-  cd "${app_dir}" || log_error "无法切换到应用目录 ${app_dir} ！"
-}
-
-# docker build
-docker_build() {
-  switch_app_dir
+  local app_dir="${ZERO_DIR}/code/${PROJECT}/${module_dir}"
 
   log_info "docker build ${ZERO_APPLICATION}:${ZERO_IMAGE_TAG} ..."
-  docker build -f Dockerfile -t "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG}" . || log_error "docker build 失败！"
+  docker build -f "${app_dir}/Dockerfile" -t "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG}" "${app_dir}" || log_error "docker build 失败！"
 }
 
 # docker push
@@ -188,9 +178,6 @@ main() {
   # docker push
   # 开源版本暂不推送镜像，开发者可自行修改仓库地址和脚本
   # docker_push
-
-  # 切换工程目录
-  switch_code_dir
 
   log_info "${ZERO_DOCKER_REGISTRY}/${ZERO_REGISTRY_NAMESPACE}/${ZERO_APPLICATION}:${ZERO_IMAGE_TAG} 构建成功！"
 }
