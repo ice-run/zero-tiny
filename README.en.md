@@ -19,7 +19,7 @@ Docker container technology solution is supported.
 ### One-Click Installation
 
 ```shell
-curl -fsSLO https://gitee.com/ice-run/zero-tiny/raw/master/install.sh && chmod +x install.sh && ./install.sh
+curl -fsSLO https://gitee.com/ice-run/zero-tiny/raw/master/install.sh && bash install.sh
 ```
 
 ### Manual Build

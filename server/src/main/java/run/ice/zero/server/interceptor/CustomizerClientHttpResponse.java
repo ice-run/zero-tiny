@@ -1,10 +1,10 @@
 package run.ice.zero.server.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
@@ -19,7 +19,7 @@ public class CustomizerClientHttpResponse implements ClientHttpResponse {
     private byte[] body;
 
 
-    CustomizerClientHttpResponse(ClientHttpResponse response, @Nullable byte[] body) {
+    CustomizerClientHttpResponse(ClientHttpResponse response, byte @Nullable [] body) {
         this.response = response;
         this.body = body;
     }
